@@ -36,6 +36,7 @@ BREW_GUI_PACKAGES=(
   google-chrome
   firefox@developer-edition
   postman
+  protonvpn
 ) && brew install --quiet --casks ${BREW_GUI_PACKAGES[@]} 
 ```
 
