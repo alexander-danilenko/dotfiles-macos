@@ -129,6 +129,7 @@ NPM_PACKAGES=(
   http-server # Simple HTTP server for static files in directory
   snyk # snyk.com CLI
   typescript
+  @openapitools/openapi-generator-cli
 ) && npm install --global ${NPM_PACKAGES[@]}
 ```
 
