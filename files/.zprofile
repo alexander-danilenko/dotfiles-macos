@@ -16,6 +16,7 @@ PATH_DIRS=(
   "$HOME/Projects/bin"
   "$HOME/miniconda3/bin"
   "$HOME/Projects/bin/google-cloud-sdk/bin"
+  "/opt/homebrew/opt/openjdk/bin"
 )
 for PATH_DIR in "${PATH_DIRS[@]}"; do
   if [ -d "$PATH_DIR" ] && [[ ":$PATH:" != *":$PATH_DIR:"* ]]; then
