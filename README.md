@@ -1,4 +1,32 @@
+<p align="center"><img src="https://cdn.svgporn.com/logos/macOS.svg" /></p>
+
 <h1 align="center">MacOS Dotfiles and system config</h1>
+
+📖 Table of contents:
+- [Prerequisites](#prerequisites)
+- [Hardware](#hardware)
+  - [Apple keyboard](#apple-keyboard)
+    - [Karabiner](#karabiner)
+- [Software](#software)
+  - [Terminal](#terminal)
+    - [Git](#git)
+    - [ZSH](#zsh)
+    - [Fish Shell](#fish-shell)
+- [Development](#development)
+  - [Node.JS](#nodejs)
+  - [Visual Studio Code](#visual-studio-code)
+- [Cloud](#cloud)
+  - [AWS Cli](#aws-cli)
+  - [Google Cloud](#google-cloud)
+  - [OpenTofu](#opentofu)
+  - [Terraform](#terraform)
+- [Containerization](#containerization)
+  - [Docker](#docker)
+  - [Docksal](#docksal)
+- [Troubleshooting](#troubleshooting)
+
+
+---
 
 ## Prerequisites
 
@@ -6,6 +34,30 @@ Brew: https://brew.sh/
   ```shell
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   ```
+
+## Hardware
+
+### Apple keyboard
+
+#### Karabiner
+
+Install [Karabiner](https://karabiner-elements.pqrs.org/):
+```shell
+brew install --cask karabiner-elements
+```
+
+Remap <kbd>§</kbd> to <kbd>`</kbd> for external Ukrainian/British external keyboard:
+
+https://ke-complex-modifications.pqrs.org/#section_sign_to_backtick_in_English_keyboards 
+
+<details>
+  <summary>JSON</summary>
+
+  ```json
+  {"title":"Section sign (§) to backtick (`) in English keyboards","maintainers":["kuzdogan"],"rules":[{"description":"Remap section sign (§) to backtick (`) + plus minus (±) to tilde (~) in English keyboards","manipulators":[{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash"},"to":[{"key_code":"grave_accent_and_tilde"}]},{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash","modifiers":{"mandatory":["option"]}},"to":[{"key_code":"grave_accent_and_tilde","modifiers":["option"]}]},{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash","modifiers":{"mandatory":["shift"],"optional":["caps_lock"]}},"to":[{"key_code":"grave_accent_and_tilde","modifiers":["shift"]}]}]}]}
+  ```
+</details>
+
 
 ## Software
 
