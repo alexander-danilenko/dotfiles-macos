@@ -104,7 +104,7 @@ curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/f
 #### ZSH
 
 ```shell
-curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/.zprofile >> ~/.zprofile
+curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/.profile >> ~/.profile
 ```
 
 #### [Fish Shell](https://fishshell.com/)
