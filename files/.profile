@@ -1,12 +1,24 @@
-####### Node Version Manager ###################################################
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+if [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ]; then
+  source "$HOME/.bashrc"
+fi
 
 ######## Aliases ###############################################################
 alias node-modules-ls='find . -name "node_modules" -type d -prune -print | xargs du -chs'
 alias node-modules-rm='find . -name "node_modules" -type d -prune -exec rm -rf "{}" +'
-alias ll="ls -la"
+
+######## Load local config #####################################################
+if [ -f "$HOME/.profile.local" ]; then
+  source "$HOME/.profile.local"
+fi
+
+######## NVM section ###########################################################
+export NVM_DIR="${HOME}/.nvm"
+if [ -s "$NVM_DIR/nvm.sh" ] ; then
+  source "$NVM_DIR/nvm.sh"
+  if [ -x "$(command -v npm)" ]; then
+    PATH="$PATH:$(npm config --location=global get prefix)/bin"
+  fi
+fi
 
 ######## PATH variable overriding ##############################################
 PATH_DIRS=(
@@ -14,8 +26,8 @@ PATH_DIRS=(
   "$HOME/.local/bin"
   "$HOME/.composer/vendor/bin"
   "$HOME/Projects/bin"
-  "$HOME/miniconda3/bin"
-  "$HOME/Projects/bin/google-cloud-sdk/bin"
+  "$HOME/Work/bin"
+  "/opt/homebrew/bin"
   "/opt/homebrew/opt/openjdk/bin"
 )
 for PATH_DIR in "${PATH_DIRS[@]}"; do
@@ -23,4 +35,3 @@ for PATH_DIR in "${PATH_DIRS[@]}"; do
     PATH="$PATH_DIR:$PATH"
   fi
 done
-
