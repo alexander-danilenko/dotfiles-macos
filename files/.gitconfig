@@ -21,8 +21,13 @@
   c          = commit -m
   hidden     = !git ls-files -v | grep "^[[:lower:]]"
   hide       = update-index --assume-unchanged
+  history    = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+  last       = log -1 HEAD --stat 
+  ls         = log --stat
   p          = "!git pull origin $(git branch --show-current) --rebase --autostash"
-  pp         = "!git pull origin develop --rebase --autostash"
+  pd         = pull origin develop --rebase --autostash
+  pm         = pull origin main --rebase --autostash
+  pmm        = pull origin master --rebase --autostash
   s          = status --short --branch
   unhide     = update-index --no-assume-unchanged
 
