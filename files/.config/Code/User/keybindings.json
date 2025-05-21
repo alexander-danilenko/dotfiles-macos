@@ -1,0 +1,27 @@
+// Place your key bindings in this file to override the defaults
+[
+  // ======== Cursor specific keybindings. ======================================
+  // {
+  //     "key": "cmd+i",
+  //     "command": "composerMode.agent"
+  // },
+
+  {
+      "key": "cmd+[",
+      "command": "workbench.action.navigateBack"
+  },
+  {
+      "key": "cmd+]",
+      "command": "workbench.action.navigateForward"
+  },
+  {
+      "key": "cmd+[",
+      "command": "-editor.action.outdentLines",
+      "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+      "key": "cmd+]",
+      "command": "-editor.action.indentLines",
+      "when": "editorTextFocus && !editorReadonly"
+  }
+]
