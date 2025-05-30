@@ -46,17 +46,7 @@ Install [Karabiner](https://karabiner-elements.pqrs.org/):
 brew install --cask karabiner-elements
 ```
 
-Remap <kbd>§</kbd> to <kbd>`</kbd> for external Ukrainian/British external keyboard:
-
-https://ke-complex-modifications.pqrs.org/#section_sign_to_backtick_in_English_keyboards 
-
-<details>
-  <summary>JSON</summary>
-
-  ```json
-  {"title":"Section sign (§) to backtick (`) in English keyboards","maintainers":["kuzdogan"],"rules":[{"description":"Remap section sign (§) to backtick (`) + plus minus (±) to tilde (~) in English keyboards","manipulators":[{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash"},"to":[{"key_code":"grave_accent_and_tilde"}]},{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash","modifiers":{"mandatory":["option"]}},"to":[{"key_code":"grave_accent_and_tilde","modifiers":["option"]}]},{"type":"basic","conditions":[{"type":"input_source_if","input_sources":[{"language":"^en$"}]}],"from":{"key_code":"non_us_backslash","modifiers":{"mandatory":["shift"],"optional":["caps_lock"]}},"to":[{"key_code":"grave_accent_and_tilde","modifiers":["shift"]}]}]}]}
-  ```
-</details>
+- [Fix Ukrainian Apple Keyboard rule](./files/.config/karabiner/rules/fix-ukrainian-apple-keyboard.json)
 
 
 ## Software
