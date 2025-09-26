@@ -190,7 +190,7 @@ brew install --cask visual-studio-code
 
 Download config:
 ```bash
-curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/.config/Code/User/settings.json > ~/.config/Code/User/settings.json
+curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User/settings.json > "$HOME/Library/Application Support/Code/User/settings.json"
 ```
 
 Install extensions
