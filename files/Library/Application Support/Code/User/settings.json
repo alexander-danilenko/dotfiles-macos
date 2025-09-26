@@ -1,25 +1,22 @@
 {
-    "composer.executablePath": "$HOME/.local/bin/composer",
-    "debug.console.fontSize": 15,
-    "editor.fontFamily": "Jetbrains Mono Medium, Droid Sans Mono, Consolas, Courier New, monospace",
+    "editor.fontFamily": "Jetbrains Mono, Droid Sans Mono, Consolas, Courier New, monospace",
     "editor.fontLigatures": true,
-    "editor.fontSize": 15,
     "editor.renderWhitespace": "selection",
-    "editor.rulers": [8, 16, 32, 80, 120],
-    "editor.selectionClipboard": false,
+    "editor.rulers": [
+        8,
+        16,
+        32,
+        80,
+        120
+    ],
     "editor.suggestSelection": "first",
     "editor.tabSize": 2,
-    "gitlens.currentLine.enabled": false,
-    "phpcs.standard": "Drupal",
-    "terminal.integrated.fontSize": 15,
-    "vsintellicode.modify.editor.suggestSelection": "automaticallyOverrodeDefaultValue",
-    "window.menuBarVisibility": "toggle",
+    "terminal.integrated.fontSize": 12,
     "window.zoomLevel": 0,
-    "workbench.activityBar.visible": true,
     "workbench.colorTheme": "GitHub Dark",
     "workbench.iconTheme": "material-icon-theme",
     "workbench.statusBar.visible": true,
-    "workbench.colorCustomizations": {  
+    "workbench.colorCustomizations": {
         "editorRuler.foreground": "#303030"
     },
     "files.associations": {
@@ -29,5 +26,13 @@
         "*.install": "php",
         "*.module": "php",
         "*.theme": "php"
+    },
+    "debug.console.fontSize": 12,
+    "chat.mcp.access": "all",
+    "chat.tools.terminal.autoApprove": {
+        "node": true,
+        "git log": true,
+        "git diff": true,
+        "git status": true,
     }
 }

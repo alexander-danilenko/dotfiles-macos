@@ -190,7 +190,11 @@ brew install --cask visual-studio-code
 
 Download config:
 ```bash
-curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User/settings.json > "$HOME/Library/Application Support/Code/User/settings.json"
+githubDir="https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User"
+cd "$HOME/Library/Application Support/Code/User" && \
+curl -O $githubDir/settings.json && \
+curl -O $githubDir/keybindings.json && \
+curl -O $githubDir/mcp.json
 ```
 
 Install extensions
