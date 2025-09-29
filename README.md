@@ -11,7 +11,6 @@
     - [ZSH](#zsh)
     - [Fish Shell](#fish-shell)
 - [Development](#development)
-  - [Node.JS](#nodejs)
   - [Visual Studio Code](#visual-studio-code)
 - [Containerization](#containerization)
   - [Docker](#docker)
@@ -92,47 +91,6 @@ omf install bobthefish bass nvm aws; omf theme bobthefish
 ```
 
 ## Development
-
-
-<img src="https://cdn.svgporn.com/logos/nodejs.svg" width="17%" align="right" />
-
-### Node.JS
-
-> [`NVM`](https://github.com/nvm-sh/nvm) allows you to quickly install and use different versions of node via the command line.
-
-Install NVM:
-
-```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
-```
-
-Install LTS and set as default:
-
-```bash
-NODE_VERSION=20 && nvm install $NODE_VERSION && nvm alias default "$NODE_VERSION"
-```
-
-Install global packages:
-
-```bash
-NPM_PACKAGES=(
-  '@nestjs/cli' # Nest.JS CLI
-  contentful-cli # Contentful.com CLI
-  dynamodb-admin # Handy Web-UI for viewing local DynamoDB data
-  eslint
-  eslint-plugin-import
-  eslint-plugin-jsx-a11y
-  eslint-plugin-node
-  eslint-plugin-promise
-  eslint-plugin-react
-  eslint-plugin-react-hooks
-  firebase-tools
-  http-server # Simple HTTP server for static files in directory
-  snyk # snyk.com CLI
-  typescript
-  @openapitools/openapi-generator-cli
-) && npm install --global ${NPM_PACKAGES[@]}
-```
 
 <img src="https://cdn.svgporn.com/logos/visual-studio-code.svg" width="17%" align="right" />
 
