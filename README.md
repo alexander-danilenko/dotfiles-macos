@@ -13,11 +13,6 @@
 - [Development](#development)
   - [Node.JS](#nodejs)
   - [Visual Studio Code](#visual-studio-code)
-- [Cloud](#cloud)
-  - [AWS Cli](#aws-cli)
-  - [Google Cloud](#google-cloud)
-  - [OpenTofu](#opentofu)
-  - [Terraform](#terraform)
 - [Containerization](#containerization)
   - [Docker](#docker)
   - [Docksal](#docksal)
@@ -43,7 +38,7 @@ This will install all the essential CLI tools, GUI applications, development too
 
 ### Quick Setup with Brewfile
 
-For a streamlined installation of all packages and applications, use the provided Brewfile:
+For a streamlined installation of all packages and applications, use the provided [Brewfile](./files/Brewfile):
 
 ```bash
 # Download the Brewfile
@@ -104,6 +99,9 @@ omf install bobthefish bass nvm aws; omf theme bobthefish
 
 ## Development
 
+
+<img src="https://cdn.svgporn.com/logos/nodejs.svg" width="17%" align="right" />
+
 ### Node.JS
 
 > [`NVM`](https://github.com/nvm-sh/nvm) allows you to quickly install and use different versions of node via the command line.
@@ -117,9 +115,7 @@ curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash
 Install LTS and set as default:
 
 ```bash
-NODE_VERSION=20 && \
-nvm install $NODE_VERSION && \
-nvm alias default "$NODE_VERSION"
+NODE_VERSION=20 && nvm install $NODE_VERSION && nvm alias default "$NODE_VERSION"
 ```
 
 Install global packages:
@@ -130,9 +126,6 @@ NPM_PACKAGES=(
   contentful-cli # Contentful.com CLI
   dynamodb-admin # Handy Web-UI for viewing local DynamoDB data
   eslint
-  eslint-config-airbnb
-  eslint-config-google
-  eslint-config-standard
   eslint-plugin-import
   eslint-plugin-jsx-a11y
   eslint-plugin-node
@@ -147,59 +140,19 @@ NPM_PACKAGES=(
 ) && npm install --global ${NPM_PACKAGES[@]}
 ```
 
-<img src="https://cdn.svgporn.com/logos/php.svg" width="17%" align="right" />
-
 <img src="https://cdn.svgporn.com/logos/visual-studio-code.svg" width="17%" align="right" />
 
 ### Visual Studio Code
 
-https://code.visualstudio.com/docs/setup/mac
-
-
-```bash
-brew install --cask visual-studio-code
-```
-
 Download config:
 ```bash
-githubDir="https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User"
 cd "$HOME/Library/Application Support/Code/User" && \
-curl -O $githubDir/settings.json && \
-curl -O $githubDir/keybindings.json && \
-curl -O $githubDir/mcp.json
+curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/settings.json && \
+curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/keybindings.json && \
+curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/mcp.json
 ```
 
 > **Note**: VS Code extensions are now managed via the [Brewfile](#quick-setup-with-brewfile) and will be installed automatically with `brew bundle`.
-
-## Cloud
-
-<img src="https://cdn.svgporn.com/logos/aws.svg" width="17%" align="right" />
-
-### AWS Cli
-
-https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
-
-<img src="https://cdn.svgporn.com/logos/google-cloud.svg" width="17%" align="right" />
-
-### Google Cloud
-
-https://cloud.google.com/sdk/docs/install#mac
-
-<img src="https://raw.githubusercontent.com/opentofu/brand-artifacts/main/full/transparent/SVG/on-light.svg" width="17%" align="right" />
-
-### OpenTofu 
-
-```shell
-brew install opentofu
-```
-
-<img src="https://cdn.svgporn.com/logos/terraform-icon.svg" width="17%" align="right" />
-
-### Terraform 
-
-```shell
-brew install terraform
-```
 
 ## Containerization
 
