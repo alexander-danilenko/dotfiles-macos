@@ -9,7 +9,7 @@
   - [Terminal](#terminal)
     - [Git](#git)
     - [ZSH](#zsh)
-    - [Fish Shell](#fish-shell)
+    - [ZSH with Oh My Zsh](#zsh-with-oh-my-zsh)
 - [Development](#development)
   - [Visual Studio Code](#visual-studio-code)
 - [Containerization](#containerization)
@@ -71,7 +71,13 @@ curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/f
 
 Install Oh My Zsh:
 ```bash
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+```
+
+Install external plugins:
+```shell
+git clone --depth=1 --single-branch --quiet https://github.com/zsh-users/zsh-autosuggestions "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-autosuggestions" 2>/dev/null || echo "zsh-autosuggestions already exists, skipping"
+git clone --depth=1 --single-branch --quiet https://github.com/zsh-users/zsh-syntax-highlighting.git "${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting" 2>/dev/null || echo "zsh-syntax-highlighting already exists, skipping"
 ```
 
 Copy ZSH config:
