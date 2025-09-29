@@ -63,32 +63,40 @@ curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/f
 curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/.profile >> ~/.profile
 ```
 
-#### [Fish Shell](https://fishshell.com/)
+#### [ZSH with Oh My Zsh](https://ohmyz.sh/)
 
-<img src="https://fishshell.com/assets/img/Terminal_Logo_LCD_Small.png" width="17%" align="right" />
+<img src="https://ohmyz.sh/img/OMZLogo_BnW.png" width="17%" align="right" />
 
-> Fish is a smart and user-friendly command lineshell for Linux, macOS, and the rest of the family.
+> Oh My Zsh is a delightful, open source, community-driven framework for managing your Zsh configuration.
 
-Copy config:
+Install Oh My Zsh:
 ```bash
-mkdir -p $HOME/.config/fish/ && \
-curl -L# -o $HOME/.config/fish/config.fish https://github.com/alexander-danilenko/dotfiles-macos/blob/main/files/.config/fish/config.fish
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
-**[Oh My Fish](https://github.com/oh-my-fish/oh-my-fish)**: Package manager
-
-> [Oh My Fish](https://github.com/oh-my-fish/oh-my-fish) provides core infrastructure to allow you to install packages which extend or modify the look of your shell. It's fast, extensible and easy to use..
-
-Install `oh-my-fish`:
-
+Copy ZSH config:
 ```bash
-curl https://raw.githubusercontent.com/oh-my-fish/oh-my-fish/master/bin/install | fish
+curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/.zshrc > ~/.zshrc
 ```
 
-Run `fish` and install plugins:
-```bash
-omf install bobthefish bass nvm aws; omf theme bobthefish
-```
+**Oh My Zsh Features**:
+- Over 200+ plugins and themes
+- Auto-completion and syntax highlighting
+- Git integration with useful aliases
+- Plugin ecosystem for development tools
+- Easy customization and theming
+
+**Included Plugins**:
+- `git` - Git aliases and functions
+- `aws` - AWS CLI completion
+- `docker` - Docker aliases and completion
+- `nvm` - Node Version Manager integration
+- `python` - Python development tools
+- `brew` - Homebrew integration
+- `macos` - macOS-specific utilities
+- `vscode` - VS Code integration
+- `zsh-autosuggestions` - Command suggestions
+- `zsh-syntax-highlighting` - Syntax highlighting
 
 ## Development
 

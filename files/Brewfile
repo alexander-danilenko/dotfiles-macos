@@ -25,7 +25,7 @@ brew "yt-dlp"                # YouTube-dl fork with additional features and fixe
 brew "gnupg"                 # GNU Privacy Guard - OpenPGP implementation
 
 # Shell
-brew "fish"                  # Smart and user-friendly command line shell
+brew "zsh"                   # Z shell - advanced shell with scripting capabilities
 
 # =============================================================================
 # CLOUD AND INFRASTRUCTURE TOOLS
