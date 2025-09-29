@@ -18,6 +18,12 @@ brew "tree"                  # Display directory structure in tree format
 brew "uv"                    # Fast Python package manager and project manager
 brew "yq"                    # Portable command-line YAML processor
 
+# PHP development
+brew "php"                   # PHP runtime and CLI interpreter
+brew "composer"              # Dependency manager for PHP projects
+brew "phpunit"               # PHPUnit testing framework
+brew "phpstan"               # PHP static analysis tool
+
 # Media and content
 brew "yt-dlp"                # YouTube-dl fork with additional features and fixes
 
