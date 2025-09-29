@@ -1,0 +1,152 @@
+# Brewfile - macOS Development Environment
+# Generated from dotfiles-macos configuration
+# 
+# Install with: brew bundle
+
+# =============================================================================
+# CLI TOOLS - Essential command-line utilities
+# =============================================================================
+
+# File management and utilities
+brew "ffmpeg"                # Complete, cross-platform solution for audio/video
+brew "jq"                    # Lightweight and flexible command-line JSON processor
+brew "mc"                    # Midnight Commander - visual file manager
+brew "uv"                    # Fast Python package manager and project manager
+brew "yq"                    # Portable command-line YAML processor
+
+# Media and content
+brew "yt-dlp"                # YouTube-dl fork with additional features and fixes
+
+# Security and cryptography
+brew "gnupg"                 # GNU Privacy Guard - OpenPGP implementation
+
+# Shell
+brew "fish"                  # Smart and user-friendly command line shell
+
+# =============================================================================
+# CLOUD AND INFRASTRUCTURE TOOLS
+# =============================================================================
+
+# Cloud SDKs
+brew "awscli"                # Amazon Web Services Command Line Interface
+cask "google-cloud-sdk"      # Google Cloud SDK for GCP development and deployment
+
+# Infrastructure as Code
+brew "opentofu"              # OpenTofu - Open Source alternative to Terraform
+brew "terraform"             # HashiCorp Terraform for infrastructure management
+
+# =============================================================================
+# CONTAINERIZATION
+# =============================================================================
+
+# Container runtime
+cask "orbstack"               # Fast, lightweight alternative to Docker Desktop
+
+# Note: Docker Desktop is typically installed via the official installer
+# from https://docs.docker.com/desktop/install/mac-install/
+# rather than through Homebrew
+
+# Docksal is installed via their custom installer script:
+# bash <(curl -fsSL https://get.docksal.io)
+# This is not a Homebrew package
+
+# =============================================================================
+# DEVELOPMENT TOOLS
+# =============================================================================
+
+# Code editors
+cask "cursor"                # AI-powered code editor
+cask "visual-studio-code"    # Microsoft Visual Studio Code editor
+
+# Development utilities
+cask "jetbrains-toolbox"     # JetBrains IDEs management tool
+cask "meld"                  # Visual diff and merge tool for comparing files and directories
+cask "postman"               # API development and testing platform
+
+# VS Code extensions
+vscode "GitHub.copilot"                       # GitHub Copilot!
+vscode "GitHub.vscode-github-actions"         # Github Actions support
+vscode "acarreiro.calculate"                  # Calculates inline math expr
+vscode "christian-kohler.path-intellisense"  # File path autocomplete
+vscode "christian-kohler.npm-intellisense"   # NPM better autocomplete
+vscode "dakara.transformer"                   # Filter, Sort, Unique, Reverse, Align, CSV, Line Selection, Text Transformations and Macros
+vscode "dbaeumer.vscode-eslint"               # Eslint support
+vscode "dotenv.dotenv-vscode"                 # .env support
+vscode "editorconfig.editorconfig"            # EditorConfig support
+vscode "github.github-vscode-theme"           # GitHub color theme
+vscode "golang.go"                            # Golang support
+vscode "ms-azuretools.vscode-docker"         # Docker support
+vscode "ms-python.python"                     # Python support
+vscode "ms-vscode-remote.remote-ssh"          # SSH support
+vscode "pkief.material-icon-theme"            # Material Icon Theme
+vscode "rokoroku.vscode-theme-darcula"        # JetBrains-like theme
+vscode "tommasov.hosts"                       # Hosts file syntax highlighter
+vscode "tyriar.lorem-ipsum"                   # Lorem Ipsum generator
+vscode "yzhang.markdown-all-in-one"           # Markdown tools
+
+# =============================================================================
+# GUI APPLICATIONS - Desktop applications
+# =============================================================================
+
+# AI and productivity tools
+cask "claude"                # Anthropic's AI assistant
+# cask "chatgpt"             # OpenAI ChatGPT desktop app (optional - uncomment if needed)
+cask "msty"                  # AI-powered code completion and chat assistant
+cask "obsidian"              # Knowledge management and note-taking app
+cask "ollama-app"            # Ollama desktop app for running large language models locally
+# cask "lm-studio"           # Local AI model runner (optional - uncomment if needed)
+
+# Apple Office Suite (Mac App Store)
+mas "Keynote", id: 409183694     # Apple presentation software
+mas "Numbers", id: 409203825     # Apple spreadsheet application
+mas "Pages", id: 409201541       # Apple word processor
+
+# Communication and collaboration
+cask "slack"                 # Business communication platform
+mas "Telegram", id: 747648890        # Secure messaging app
+cask "zoom"                  # Video conferencing and communication platform
+
+# Developer tools (Mac App Store)
+mas "ColorSlurp", id: 1287239339     # Ultimate color picker for designers and developers
+mas "JSON Peep for Safari", id: 1458969831  # Safari extension for viewing JSON responses
+
+# File synchronization
+cask "synology-drive"        # Synology Drive client for file sync
+
+# Fonts
+cask "font-jetbrains-mono"           # Monospace font designed for developers
+cask "font-jetbrains-mono-nerd-font" # JetBrains Mono with Nerd Font icons and symbols
+
+# Security and productivity
+cask "1password"             # Password manager and digital vault
+cask "anydesk"               # Remote desktop software
+cask "protonvpn"             # VPN service for privacy and security
+
+# Web browsers
+cask "firefox@developer-edition"  # Firefox Developer Edition
+cask "google-chrome"         # Google Chrome web browser
+cask "vivaldi"              # Vivaldi browser with advanced customization features
+
+# =============================================================================
+# SYSTEM UTILITIES
+# =============================================================================
+
+# Battery management
+cask "aldente"                # Battery charge limiter for MacBooks
+
+# Keyboard customization
+cask "karabiner-elements"     # Keyboard customizer for macOS
+
+# Screenshot and media tools
+cask "shottr"                # Advanced screenshot tool with scrolling capture and annotations
+
+# System utilities (Mac App Store)
+mas "Amphetamine", id: 937984704  # Keep Mac awake utility
+
+# =============================================================================
+# NOTES
+# =============================================================================
+#
+# Additional packages that are installed via other methods:
+# - Docksal: bash <(curl -fsSL https://get.docksal.io)
+#

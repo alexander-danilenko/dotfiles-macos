@@ -4,10 +4,8 @@
 
 📖 Table of contents:
 - [Prerequisites](#prerequisites)
-- [Hardware](#hardware)
-  - [Apple keyboard](#apple-keyboard)
-    - [Karabiner](#karabiner)
 - [Software](#software)
+  - [Quick Setup with Brewfile](#quick-setup-with-brewfile)
   - [Terminal](#terminal)
     - [Git](#git)
     - [ZSH](#zsh)
@@ -23,6 +21,9 @@
 - [Containerization](#containerization)
   - [Docker](#docker)
   - [Docksal](#docksal)
+- [Hardware](#hardware)
+  - [Apple keyboard](#apple-keyboard)
+    - [Karabiner](#karabiner)
 - [Troubleshooting](#troubleshooting)
 
 
@@ -35,52 +36,23 @@ Brew: https://brew.sh/
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   ```
 
-## Hardware
 
-### Apple keyboard
-
-#### Karabiner
-
-Install [Karabiner](https://karabiner-elements.pqrs.org/):
-```shell
-brew install --cask karabiner-elements
-```
-
-- [Fix Ukrainian Apple Keyboard rule](./files/.config/karabiner/rules/fix-ukrainian-apple-keyboard.json)
-
+This will install all the essential CLI tools, GUI applications, development tools, and fonts in one command. The Brewfile includes:
 
 ## Software
 
-Musthave non-gui packages:
+### Quick Setup with Brewfile
+
+For a streamlined installation of all packages and applications, use the provided Brewfile:
 
 ```bash
-BREW_CLI_PACKAGES=(
-  jq
-  yq
-  mc
-  ffmpeg
-  yt-dlp
-  fish
-) && brew install ${BREW_CLI_PACKAGES[@]} 
+# Download the Brewfile
+curl -O https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/files/Brewfile
+
+# Install all packages and applications
+brew bundle
 ```
 
-Musthave gui apps:
-
-```bash
-BREW_GUI_PACKAGES=(
-  1password
-  anydesk
-  zoom
-  slack
-  font-jetbrains-mono
-  jetbrains-toolbox
-  synology-drive
-  google-chrome
-  firefox@developer-edition
-  postman
-  protonvpn
-) && brew install --quiet --casks ${BREW_GUI_PACKAGES[@]} 
-```
 
 ### Terminal
 
@@ -197,38 +169,7 @@ curl -O $githubDir/keybindings.json && \
 curl -O $githubDir/mcp.json
 ```
 
-Install extensions
-
-```bash
-CODE_EXTENSIONS=(
-  GitHub.copilot                       # GitHub Copilot!
-  GitHub.vscode-github-actions         # Github Actions support
-  acarreiro.calculate                  # Calculates inline math expr
-  christian-kohler.path-intellisense   # File path autocomplete
-  dakara.transformer                   # Filter, Sort, Unique, Reverse, Align, CSV, Line Selection, Text Transformations and Macros
-  dotenv.dotenv-vscode                 # .env support
-  editorconfig.editorconfig            # EditorConfig support
-  golang.go                            # Golang support
-  ms-azuretools.vscode-docker          # Docker support
-  ms-python.python                     # Python support
-  ms-vscode-remote.remote-ssh          # SSH support
-  tommasov.hosts                       # Hosts file syntax highlighter
-  tyriar.lorem-ipsum                   # Lorem Ipsum generator
-  yzhang.markdown-all-in-one           # Markdown tools
-  #redhat.ansible                      # Ansible support
-
-  # Node/NPM/Yarn specific extensions
-  christian-kohler.npm-intellisense # NPM better autocomplete
-  dbaeumer.vscode-eslint            # Eslint support
-  
-  # Themes
-  github.github-vscode-theme    # GitHub color theme
-  pkief.material-icon-theme     # Material Icon Theme
-  rokoroku.vscode-theme-darcula # JetBrains-like theme
-) && for extension in "${CODE_EXTENSIONS[@]}"; do
-  code --install-extension "$extension" --force
-done
-```
+> **Note**: VS Code extensions are now managed via the [Brewfile](#quick-setup-with-brewfile) and will be installed automatically with `brew bundle`.
 
 ## Cloud
 
@@ -277,6 +218,19 @@ https://docksal.io/installation#linux-supported
 ```shell
 bash <(curl -fsSL https://get.docksal.io)
 ```
+
+## Hardware
+
+### Apple keyboard
+
+#### Karabiner
+
+Install [Karabiner](https://karabiner-elements.pqrs.org/):
+```shell
+brew install --cask karabiner-elements
+```
+
+- [Fix Ukrainian Apple Keyboard rule](./files/.config/karabiner/rules/fix-ukrainian-apple-keyboard.json)
 
 
 ## Troubleshooting

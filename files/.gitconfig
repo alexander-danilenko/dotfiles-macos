@@ -10,6 +10,18 @@
 
 [diff]
   renames    = copies
+  tool       = meld
+
+[difftool]
+  prompt     = false
+
+[merge]
+  tool       = meld
+
+[mergetool]
+  keepBackup = false
+  prompt     = false
+
 
 [color]
   ui         = true
@@ -31,5 +43,3 @@
   s          = status --short --branch
   unhide     = update-index --no-assume-unchanged
 
-[mergetool]
-  keepBackup = true
