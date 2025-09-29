@@ -11,6 +11,10 @@
 brew "ffmpeg"                # Complete, cross-platform solution for audio/video
 brew "jq"                    # Lightweight and flexible command-line JSON processor
 brew "mc"                    # Midnight Commander - visual file manager
+brew "neofetch"              # Fast, highly customizable system info script
+brew "nvm"                   # Node Version Manager - manage multiple Node.js versions
+brew "tldr"                  # Simplified and community-driven man pages
+brew "tree"                  # Display directory structure in tree format
 brew "uv"                    # Fast Python package manager and project manager
 brew "yq"                    # Portable command-line YAML processor
 
@@ -101,6 +105,10 @@ mas "Keynote", id: 409183694     # Apple presentation software
 mas "Numbers", id: 409203825     # Apple spreadsheet application
 mas "Pages", id: 409201541       # Apple word processor
 
+# Office Suite
+cask "libreoffice"              # Free and open-source office suite
+cask "libreoffice-language-pack" # Language pack for LibreOffice
+
 # Communication and collaboration
 cask "slack"                 # Business communication platform
 mas "Telegram", id: 747648890        # Secure messaging app
@@ -113,9 +121,6 @@ mas "JSON Peep for Safari", id: 1458969831  # Safari extension for viewing JSON 
 # File synchronization
 cask "synology-drive"        # Synology Drive client for file sync
 
-# Fonts
-cask "font-jetbrains-mono"           # Monospace font designed for developers
-cask "font-jetbrains-mono-nerd-font" # JetBrains Mono with Nerd Font icons and symbols
 
 # Security and productivity
 cask "1password"             # Password manager and digital vault
@@ -128,6 +133,33 @@ cask "google-chrome"         # Google Chrome web browser
 cask "vivaldi"              # Vivaldi browser with advanced customization features
 
 # =============================================================================
+# FONTS
+# =============================================================================
+
+# Developer fonts
+cask "font-fira-code"                 # Monospace font with programming ligatures
+cask "font-hack"                     # Monospace font designed for source code
+cask "font-inconsolata"              # Monospace font designed for code listings
+cask "font-jetbrains-mono"           # Monospace font designed for developers
+cask "font-jetbrains-mono-nerd-font" # JetBrains Mono with Nerd Font icons and symbols
+
+# =============================================================================
+# QUICK LOOK PLUGINS
+# =============================================================================
+
+# Quick Look plugins for enhanced file previews in Finder
+# Note: Quick Look plugins are typically installed via Homebrew casks
+
+# Mac OS Quick-Look Plugins
+cask 'qlcolorcode'    # QL for code with highlighting
+cask 'qlmarkdown'     # QL for markdown files
+cask 'qlprettypatch'  # QL for patch / diff files
+cask 'qlstephen'      # QL for dev text files
+cask 'quicklook-csv'  # QL for tables in CSV format
+cask 'quicklook-json', args: { require_sha: false } # QL for JSON, with trees
+cask 'webpquicklook',  args: { require_sha: false } # QL for WebP image files
+
+# =============================================================================
 # SYSTEM UTILITIES
 # =============================================================================
 
@@ -137,8 +169,12 @@ cask "aldente"                # Battery charge limiter for MacBooks
 # Keyboard customization
 cask "karabiner-elements"     # Keyboard customizer for macOS
 
+# Archive and compression tools
+cask "keka"                  # File archiver and compressor for macOS
+
 # Screenshot and media tools
 cask "shottr"                # Advanced screenshot tool with scrolling capture and annotations
+cask "vlc"                   # Cross-platform multimedia player and framework
 
 # System utilities (Mac App Store)
 mas "Amphetamine", id: 937984704  # Keep Mac awake utility
