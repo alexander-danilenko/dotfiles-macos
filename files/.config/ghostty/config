@@ -1,5 +1,5 @@
 # Run `ghostty +show-config --default --docs` to view list of available config options.
-# Config Location: "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+# Config Location: "$HOME/.config/ghostty/config"
 
 # Show all: ghostty +list-themes
 theme="Github Dark"
