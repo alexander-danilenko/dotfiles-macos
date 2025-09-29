@@ -1,0 +1,9 @@
+# Run `ghostty +show-config --default --docs` to view list of available config options.
+# Config Location: "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
+
+# Show all: ghostty +list-themes
+theme="Github Dark"
+# Show all: ghostty +list-fonts
+font-family="JetBrainsMono NFM Regular"
+font-size=13
+shell-integration="detect"
