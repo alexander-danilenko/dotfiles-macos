@@ -70,12 +70,6 @@ curl https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/main/f
 
 > Fish is a smart and user-friendly command lineshell for Linux, macOS, and the rest of the family.
 
-Install `fish`:
-
-```bash
-brew instsall fish
-```
-
 Copy config:
 ```bash
 mkdir -p $HOME/.config/fish/ && \
@@ -147,9 +141,7 @@ NPM_PACKAGES=(
 Download config:
 ```bash
 cd "$HOME/Library/Application Support/Code/User" && \
-curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/settings.json && \
-curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/keybindings.json && \
-curl -O [$githubDir](https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User)/mcp.json
+curl -O https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User/settings.json -O https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User/keybindings.json -O https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/refs/heads/main/files/Library/Application%20Support/Code/User/mcp.json
 ```
 
 > **Note**: VS Code extensions are now managed via the [Brewfile](#quick-setup-with-brewfile) and will be installed automatically with `brew bundle`.
