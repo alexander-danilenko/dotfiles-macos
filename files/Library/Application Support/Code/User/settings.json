@@ -1,48 +1,133 @@
 {
-    "editor.fontFamily": "Jetbrains Mono, Droid Sans Mono, Consolas, Courier New, monospace",
-    "editor.fontLigatures": true,
-    "editor.renderWhitespace": "selection",
-    "editor.rulers": [
-        8,
-        16,
-        32,
-        80,
-        120
+  // ============================================================================
+  // VS Code Native Settings
+  // ============================================================================
+  // Editor - Appearance
+  "editor.fontFamily": "Jetbrains Mono, Droid Sans Mono, Consolas, Courier New, monospace",
+  "editor.fontLigatures": true,
+  "editor.renderWhitespace": "selection",
+  "editor.rulers": [
+    8,
+    16,
+    32,
+    80,
+    120
+  ],
+  // Editor - Cursor
+  "editor.cursorBlinking": "expand",
+  "editor.cursorSmoothCaretAnimation": "on",
+  // Editor - Guides & Brackets
+  "editor.bracketPairColorization.enabled": true,
+  "editor.bracketPairColorization.independentColorPoolPerBracketType": true,
+  "editor.guides.bracketPairs": "active",
+  "editor.guides.highlightActiveBracketPair": true,
+  "editor.guides.indentation": true,
+  // Editor - Indentation & Formatting
+  "editor.autoIndent": "full",
+  "editor.formatOnSave": true,
+  "editor.indentSize": 2,
+  "editor.tabSize": 2,
+  // Editor - Features
+  "editor.showDeprecated": true,
+  "editor.stickyScroll.enabled": true,
+  "editor.suggestSelection": "first",
+  "editor.tabCompletion": "on",
+  // Terminal
+  "terminal.integrated.fontSize": 12,
+  // Window
+  "window.zoomLevel": 0,
+  // Workbench - Appearance
+  "workbench.colorTheme": "GitHub Dark Dimmed",
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#303030"
+  },
+  "workbench.iconTheme": "material-icon-theme",
+  "workbench.statusBar.visible": true,
+  // Files
+  "files.associations": {
+    "Vagrantfile": "ruby",
+    "*.inc": "php",
+    "*.info": "ini",
+    "*.install": "php",
+    "*.module": "php",
+    "*.theme": "php"
+  },
+  // Debug
+  "debug.console.fontSize": 12,
+  // Language-specific Formatters
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  },
+  // ============================================================================
+  // Extension Settings
+  // ============================================================================
+  // Cursor (Chat/MCP)
+  "chat.mcp.access": "all",
+  "chat.tools.terminal.autoApprove": {
+    "node": true,
+    "git log": true,
+    "git diff": true,
+    "git status": true
+  },
+  // ESLint
+  "eslint.codeActionsOnSave.mode": "problems",
+  "eslint.format.enable": true,
+  // Todo Tree
+  "todo-tree.general.showIconsInsteadOfTagsInStatusBar": true,
+  "todo-tree.general.statusBar": "top three",
+  "todo-tree.general.tagGroups": {
+    "@TODO": [
+      "TODO"
     ],
-    "editor.suggestSelection": "first",
-    "editor.tabSize": 2,
-    "terminal.integrated.fontSize": 12,
-    "window.zoomLevel": 0,
-    "workbench.colorTheme": "GitHub Dark",
-    "workbench.iconTheme": "material-icon-theme",
-    "workbench.statusBar.visible": true,
-    "workbench.colorCustomizations": {
-        "editorRuler.foreground": "#303030"
+    "@FIXME": [
+      "@FIXME",
+      "FIXME",
+      "@FIXIT",
+      "FIXIT"
+    ]
+  },
+  "todo-tree.general.tags": [
+    "@TODO",
+    "TODO",
+    "@FIXME",
+    "FIXME",
+    "@FIXIT",
+    "FIXIT"
+  ],
+  "todo-tree.highlights.customHighlight": {
+    "@TODO": {
+      "gutterIcon": true,
+      "icon": "tasklist",
+      "iconColour": "#FF8C00",
+      "type": "line",
+      "background": "#CF7200",
+      "foreground": "#FFFFFF",
+      "fontWeight": "bold"
     },
-    "files.associations": {
-        "Vagrantfile": "ruby",
-        "*.inc": "php",
-        "*.info": "ini",
-        "*.install": "php",
-        "*.module": "php",
-        "*.theme": "php"
-    },
-    "debug.console.fontSize": 12,
-    "chat.mcp.access": "all",
-    "chat.tools.terminal.autoApprove": {
-        "node": true,
-        "git log": true,
-        "git diff": true,
-        "git status": true,
-    },
-    "[typescript]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.formatOnSave": true
-    },
-    "[typescriptreact]": {
-      "editor.defaultFormatter": "esbenp.prettier-vscode",
-      "editor.formatOnSave": true
-    },
-    "workbench.iconTheme": "material-icon-theme",
-    "editor.formatOnSave": true
+    "@FIXME": {
+      "gutterIcon": true,
+      "icon": "tools",
+      "iconColour": "#00FF00",
+      "type": "line",
+      "background": "#008000",
+      "foreground": "#FFFF00",
+      "fontWeight": "bold"
+    }
+  },
+  "todo-tree.regex.enableMultiLine": true,
+  "todo-tree.regex.regex": "(//|#|<!--|;|/\\*|^|^[ \\t]*(-|\\*))\\s*($TAGS)",
+  "todo-tree.regex.regexCaseSensitive": false,
+  "todo-tree.tree.showCountsInTree": true,
+  // TotalTypeScript
+  "totalTypeScript.hideAllTips": false,
+  "totalTypeScript.hideBasicTips": true,
 }
