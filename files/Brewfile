@@ -8,7 +8,7 @@
 # =============================================================================
 
 # File management and utilities
-brew "ffmpeg"                # Complete, cross-platform solution for audio/video
+#brew "ffmpeg"                # Complete, cross-platform solution for audio/video
 brew "jq"                    # Lightweight and flexible command-line JSON processor
 brew "mc"                    # Midnight Commander - visual file manager
 brew "neofetch"              # Fast, highly customizable system info script
@@ -113,7 +113,7 @@ cask "libreoffice-language-pack" # Language pack for LibreOffice
 
 # Communication and collaboration
 cask "slack"                 # Business communication platform
-mas "Telegram", id: 747648890        # Secure messaging app
+cask "telegram-desktop"      # Secure desktop Telegram client (Homebrew cask)
 cask "zoom"                  # Video conferencing and communication platform
 
 # Developer tools (Mac App Store)
@@ -123,10 +123,9 @@ mas "JSON Peep for Safari", id: 1458969831  # Safari extension for viewing JSON 
 # File synchronization
 cask "synology-drive"        # Synology Drive client for file sync
 
-
 # Security and productivity
+#cask "anydesk"               # Remote desktop software
 cask "1password"             # Password manager and digital vault
-cask "anydesk"               # Remote desktop software
 cask "protonvpn"             # VPN service for privacy and security
 
 # Web browsers
