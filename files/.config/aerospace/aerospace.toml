@@ -1,0 +1,225 @@
+# AeroSpace tiling window manager config
+# Preset: fixed app-to-workspace-to-monitor assignment
+config-version = 2
+
+after-startup-command = [
+    # Chat
+    "exec-and-forget open -a 'Slack'",
+    "exec-and-forget open -a 'Telegram'",
+    # Mail, Calendar & Reminders
+    "exec-and-forget open -a 'Mail'",
+    "exec-and-forget open -a 'Calendar'",
+    # Claude
+    "exec-and-forget open -a 'Claude'",
+    # Obsidian
+    "exec-and-forget open -a 'Obsidian'",
+    # Terminal
+    "exec-and-forget open -a 'Ghostty'",
+    # Browsers
+    "exec-and-forget open -a 'Google Chrome'",
+    "exec-and-forget open -a 'Vivaldi'",
+]
+start-at-login = false
+
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+accordion-padding = 0
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+on-focused-monitor-changed = []
+automatically-unhide-macos-hidden-apps = false
+
+# Workspaces:
+# chat     = Chat (Slack)
+# mail     = Mail, Calendar, Reminders
+# ide      = JetBrains
+# editor   = Zed
+# notes    = Obsidian
+# personal = Claude, Gemini, Telegram
+# term     = Terminal (Ghostty)
+# chrome   = Chrome
+# vivaldi  = Vivaldi
+persistent-workspaces = ["chat", "mail", "ide", "editor", "notes", "personal", "term", "chrome", "vivaldi"]
+
+on-mode-changed = []
+
+# ──────────────────────────────────────────────
+# Monitor assignment
+# Monitor 1 (main): chat, mail, ide, editor, notes, personal
+# Monitor 2 (secondary): term, chrome, vivaldi
+# ──────────────────────────────────────────────
+[workspace-to-monitor-force-assignment]
+    chat     = 'main'
+    mail     = 'main'
+    ide      = 'main'
+    editor   = 'main'
+    notes    = 'main'
+    personal = 'main'
+    term    = 'secondary'
+    chrome  = 'secondary'
+    vivaldi = 'secondary'
+
+# ──────────────────────────────────────────────
+# Auto-assign apps to workspaces
+# ──────────────────────────────────────────────
+
+# Force tiling for all windows by default
+[[on-window-detected]]
+    check-further-callbacks = true
+    run = 'layout tiling'
+
+# Workspace: chat — Slack
+[[on-window-detected]]
+    if.app-id = 'com.tinyspeck.slackmacgap'
+    run = ['move-node-to-workspace chat', 'move left']
+
+# Workspace: mail — Mail, Calendar & Reminders
+[[on-window-detected]]
+    if.app-id = 'com.apple.mail'
+    run = ['move-node-to-workspace mail', 'move left']
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.iCal'
+    run = ['move-node-to-workspace mail', 'move right', 'resize width -200']
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.reminders'
+    run = 'move-node-to-workspace mail'
+
+# Workspace: ide — JetBrains (matches any JetBrains IDE)
+[[on-window-detected]]
+    if.app-name-regex-substring = '(?i)intellij|webstorm|pycharm|phpstorm|rider|goland|clion|rubymine|datagrip|dataspell|fleet|aqua|rustrover|writerside'
+    run = 'move-node-to-workspace ide'
+
+# Workspace: editor — Zed & VS Code
+[[on-window-detected]]
+    if.app-id = 'dev.zed.Zed'
+    run = 'move-node-to-workspace editor'
+
+[[on-window-detected]]
+    if.app-id = 'com.microsoft.VSCode'
+    run = 'move-node-to-workspace editor'
+
+# Workspace: personal — Claude, Gemini & Telegram (right, 50%)
+[[on-window-detected]]
+    if.app-id = 'com.anthropic.claudefordesktop'
+    run = ['move-node-to-workspace personal', 'move left']
+
+# Gemini (Vivaldi PWA)
+[[on-window-detected]]
+    if.app-id = 'com.vivaldi.Vivaldi.app.gdfaincndogidkdcdkhapmbffkckdkhn'
+    run = ['move-node-to-workspace personal', 'move left']
+
+[[on-window-detected]]
+    if.app-id = 'ru.keepcoder.Telegram'
+    run = ['move-node-to-workspace personal', 'move right']
+
+# Workspace: term — Terminal (Ghostty)
+# Accordion layout prevents blank tiles from Ghostty's native macOS tabs
+# (each tab is a separate window to AeroSpace)
+[[on-window-detected]]
+    if.app-id = 'com.mitchellh.ghostty'
+    run = ['move-node-to-workspace term', 'layout accordion']
+
+# Workspace: chrome — Google Chrome
+[[on-window-detected]]
+    if.app-id = 'com.google.Chrome'
+    run = ['move-node-to-workspace chrome', 'fullscreen on --no-outer-gaps']
+
+# Workspace: vivaldi — Vivaldi (fullscreen without gaps for max browser real estate)
+[[on-window-detected]]
+    if.app-id = 'com.vivaldi.Vivaldi'
+    run = ['move-node-to-workspace vivaldi', 'fullscreen on --no-outer-gaps']
+
+# Workspace: notes — Obsidian & Apple Notes
+[[on-window-detected]]
+    if.app-id = 'md.obsidian'
+    run = 'move-node-to-workspace notes'
+
+[[on-window-detected]]
+    if.app-id = 'com.apple.Notes'
+    run = 'move-node-to-workspace notes'
+
+# Catch-all: any unmatched window goes to "other" workspace
+# This prevents unassigned apps from landing in designated workspaces
+[[on-window-detected]]
+    run = ['move-node-to-workspace other', 'layout floating']
+
+# ──────────────────────────────────────────────
+# Keyboard layout
+# ──────────────────────────────────────────────
+[key-mapping]
+    preset = 'qwerty'
+
+# ──────────────────────────────────────────────
+# Gaps (disabled)
+# ──────────────────────────────────────────────
+[gaps]
+    inner.horizontal = 5
+    inner.vertical =   5
+    outer.left =       5
+    outer.bottom =     5
+    outer.top =        5
+    outer.right =      5
+
+# ──────────────────────────────────────────────
+# Main keybindings
+# move-node-to-workspace bindings are intentionally
+# removed to prevent relocating apps from their
+# assigned workspaces.
+# ──────────────────────────────────────────────
+[mode.main.binding]
+
+    # Layout toggles
+    alt-slash = 'layout tiles horizontal vertical'
+    alt-comma = 'layout accordion horizontal vertical'
+
+    # Focus navigation (vim-style)
+    alt-h = 'focus left'
+    alt-j = 'focus down'
+    alt-k = 'focus up'
+    alt-l = 'focus right'
+
+    # Move windows within a workspace
+    alt-shift-h = 'move left'
+    alt-shift-j = 'move down'
+    alt-shift-k = 'move up'
+    alt-shift-l = 'move right'
+
+    # Resize
+    alt-minus = 'resize smart -50'
+    alt-equal = 'resize smart +50'
+
+    # Switch workspace
+    alt-1 = 'workspace chat'     # Chat
+    alt-2 = 'workspace mail'     # Mail, Calendar & Reminders
+    alt-3 = 'workspace personal'  # Claude, Telegram
+    alt-4 = 'workspace ide'      # JetBrains
+    alt-5 = 'workspace editor'   # Zed
+    alt-6 = 'workspace notes'    # Obsidian
+    alt-7 = 'workspace term'     # Terminal
+    alt-8 = 'workspace chrome'   # Chrome
+    alt-9 = 'workspace vivaldi'  # Vivaldi
+
+    # Quick switch
+    alt-tab = 'workspace-back-and-forth'
+    alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+    # Service mode
+    alt-shift-semicolon = 'mode service'
+
+# ──────────────────────────────────────────────
+# Service mode (press alt-shift-; to enter, esc to exit)
+# ──────────────────────────────────────────────
+[mode.service.binding]
+    esc = ['reload-config', 'mode main']
+    r = ['flatten-workspace-tree', 'mode main']
+    f = ['layout floating tiling', 'mode main']
+    backspace = ['close-all-windows-but-current', 'mode main']
+
+    alt-shift-h = ['join-with left', 'mode main']
+    alt-shift-j = ['join-with down', 'mode main']
+    alt-shift-k = ['join-with up', 'mode main']
+    alt-shift-l = ['join-with right', 'mode main']
