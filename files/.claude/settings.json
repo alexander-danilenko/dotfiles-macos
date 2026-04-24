@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "autoMemoryEnabled": true,
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "autoAllowBashIfSandboxed": true
+  },
+  "plansDirectory": "docs/claude-plans",
+  "permissions": {
+    "defaultMode": "auto",
+    "allow": [
+      "WebFetch",
+      "WebSearch",
+      "mcp__plugin_context7_context7__query-docs",
+      "mcp__plugin_context7_context7__resolve-library-id"
+    ],
+    "deny": [
+      "Bash(**/*serviceAccount*)",
+      "Bash(**/*service_account*)",
+      "Bash(**/.env*)",
+      "Bash(**/http-client.private.env.json)",
+      "Bash(**/secrets/**)",
+      "Bash(.git/**)",
+      "Bash(git * --force*)",
+      "Bash(git checkout *)",
+      "Bash(git clean *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git reset *)",
+      "Edit(**/*serviceAccount*)",
+      "Edit(**/*service_account*)",
+      "Edit(**/.env*)",
+      "Edit(**/http-client.private.env.json)",
+      "Edit(**/secrets/**)",
+      "Edit(.git/**)",
+      "Read(**/*serviceAccount*)",
+      "Read(**/*service_account*)",
+      "Read(**/.env*)",
+      "Read(**/http-client.private.env.json)",
+      "Read(**/secrets/**)",
+      "Write(**/*serviceAccount*)",
+      "Write(**/*service_account*)",
+      "Write(**/.env*)",
+      "Write(**/http-client.private.env.json)",
+      "Write(**/secrets/**)",
+      "Write(.git/**)"
+    ]
+  }
+}
