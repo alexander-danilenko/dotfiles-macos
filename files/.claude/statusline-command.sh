@@ -172,12 +172,13 @@ second_line=""
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
-# Build a rate-limit segment: {label}:{pct}% {bar}
-# Args: $1=label (e.g. "5h"), $2=pct_float
+# Build a rate-limit segment: {label}:{pct}% {bar} {Xh Ym}
+# Args: $1=label (e.g. "5h"), $2=pct_float, $3=resets_at (Unix epoch, optional)
 limit_bar() {
   local label="$1"
   local pct_float="$2"
-  local bar_width=20
+  local resets_at="${3:-}"
+  local bar_width=10
   local pct_int
   pct_int=$(printf "%.0f" "$pct_float")
   local tok_color
@@ -194,7 +195,22 @@ limit_bar() {
   local i
   for (( i=0; i<filled; i++ )); do bar="${bar}■"; done
   for (( i=0; i<empty;  i++ )); do bar="${bar}□"; done
-  printf "%s:${tok_color}%d%% %s${reset}" "$label" "$pct_int" "$bar"
+
+  # Reset time: compute Xh Ym remaining from resets_at epoch
+  local reset_str=""
+  if [ -n "$resets_at" ] && [ "$resets_at" != "null" ]; then
+    local now
+    now=$(date +%s)
+    local secs_left=$(( resets_at - now ))
+    if [ "$secs_left" -lt 0 ]; then
+      secs_left=0
+    fi
+    local hrs=$(( secs_left / 3600 ))
+    local mins=$(( (secs_left % 3600) / 60 ))
+    reset_str=$(printf " %dh %dm" "$hrs" "$mins")
+  fi
+
+  printf "%s:${tok_color}%d%% %s${reset}%s" "$label" "$pct_int" "$bar" "$reset_str"
 }
 
 if [ -n "$model_info" ]; then
@@ -210,10 +226,12 @@ if [ -n "$model_info" ]; then
 
   # Rate-limit segments: only when data is present
   if [ -n "$five_pct" ]; then
-    second_line="${second_line} | $(limit_bar "5h" "$five_pct")"
+    five_resets=$(echo "$input" | jq -r '.rate_limits.five_hour.resets_at // empty')
+    second_line="${second_line} | $(limit_bar "5h" "$five_pct" "$five_resets")"
   fi
   if [ -n "$week_pct" ]; then
-    second_line="${second_line} | $(limit_bar "7d" "$week_pct")"
+    week_resets=$(echo "$input" | jq -r '.rate_limits.seven_day.resets_at // empty')
+    second_line="${second_line} | $(limit_bar "7d" "$week_pct" "$week_resets")"
   fi
 fi
 
