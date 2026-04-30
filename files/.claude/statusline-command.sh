@@ -61,10 +61,13 @@ fi
 
 # --- Context Usage (color-coded) ---
 # <=60%: green  61-80%: yellow  >80%: red
+# Used tokens are derived from used_percentage × context_window_size so the K value
+# stays consistent with the percentage Claude Code itself displays. Reading
+# .current_usage.input_tokens directly under-counts because prompt caching moves
+# most input volume into cache_read_input_tokens / cache_creation_input_tokens.
 context_info=""
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 ctx_window=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
-ctx_input_tokens=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // empty')
 
 # Format context window size as K or M
 ctx_size_label=""
@@ -77,10 +80,10 @@ if [ -n "$ctx_window" ] && [ "$ctx_window" != "null" ]; then
   fi
 fi
 
-# Format used tokens as rounded K value (e.g. 123456 → 123K)
+# Used tokens: used_pct × ctx_window / 100, rounded to K (e.g. 8% × 200000 → 16K).
 ctx_used_label=""
-if [ -n "$ctx_input_tokens" ] && [ "$ctx_input_tokens" != "null" ]; then
-  ctx_used_label=$(awk "BEGIN { printf \"%.0fK\", $ctx_input_tokens/1000 }")
+if [ -n "$used_pct" ] && [ -n "$ctx_window" ] && [ "$ctx_window" != "null" ]; then
+  ctx_used_label=$(awk "BEGIN { printf \"%.0fK\", ($used_pct * $ctx_window / 100) / 1000 }")
 fi
 
 if [ -n "$used_pct" ]; then
@@ -160,28 +163,21 @@ if [ -n "$model_id" ]; then
   model_info=$(printf "${model_color}%s${reset}:${model_color}%s${reset}" "$short_name" "$effort")
 fi
 
-# --- Combine model+effort with context into a single bracket ---
-# Format: [model:effort usedK/size]
-if [ -n "$model_info" ] && [ -n "$used_pct" ]; then
-  context_info="[${model_info} ${ctx_tokens_str}]"
-elif [ -n "$model_info" ]; then
-  context_info="[${model_info}]"
-elif [ -n "$used_pct" ]; then
-  context_info="[${ctx_tokens_str}]"
-fi
-
-# --- Usage / Rate Limits (5-hour and 7-day) ---
-# Compact inline bracket appended to the main line.
-# Only rendered when at least one limit is present in the JSON.
-# Format: [5h:<pct>%|7d:<pct>%]  — each token colored by its own threshold.
+# --- Second line: {model}:{effort} | ctx:{used}/{total} | 5h:{pct}% {bar} | 7d:{pct}% {bar} ---
+# ctx segment always shown when model info is present.
+# Rate-limit segments only shown when data is available.
 # Color thresholds: <=60% green, <=80% yellow, >80% red.
-limits_info=""
+# Bar width: 20 characters.
+second_line=""
 five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
 week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
 
-limit_token() {
+# Build a rate-limit segment: {label}:{pct}% {bar}
+# Args: $1=label (e.g. "5h"), $2=pct_float
+limit_bar() {
   local label="$1"
   local pct_float="$2"
+  local bar_width=20
   local pct_int
   pct_int=$(printf "%.0f" "$pct_float")
   local tok_color
@@ -192,30 +188,47 @@ limit_token() {
   else
     tok_color="$red"
   fi
-  printf "${tok_color}%s:%d%%${reset}" "$label" "$pct_int"
+  local filled=$(( pct_int * bar_width / 100 ))
+  local empty=$(( bar_width - filled ))
+  local bar=""
+  local i
+  for (( i=0; i<filled; i++ )); do bar="${bar}■"; done
+  for (( i=0; i<empty;  i++ )); do bar="${bar}□"; done
+  printf "%s:${tok_color}%d%% %s${reset}" "$label" "$pct_int" "$bar"
 }
 
-if [ -n "$five_pct" ] || [ -n "$week_pct" ]; then
-  limit_parts=""
+if [ -n "$model_info" ]; then
+  # Start with model:effort
+  second_line="$model_info"
+
+  # ctx segment: always append when model is known
+  if [ -n "$ctx_tokens_str" ]; then
+    second_line="${second_line} | ctx:${ctx_tokens_str}"
+  elif [ -n "$ctx_size_label" ]; then
+    second_line="${second_line} | ctx:?/${ctx_size_label}"
+  fi
+
+  # Rate-limit segments: only when data is present
   if [ -n "$five_pct" ]; then
-    limit_parts="$(limit_token "5h" "$five_pct")"
+    second_line="${second_line} | $(limit_bar "5h" "$five_pct")"
   fi
   if [ -n "$week_pct" ]; then
-    tok_7d="$(limit_token "7d" "$week_pct")"
-    if [ -n "$limit_parts" ]; then
-      limit_parts="${limit_parts}|${tok_7d}"
-    else
-      limit_parts="$tok_7d"
-    fi
+    second_line="${second_line} | $(limit_bar "7d" "$week_pct")"
   fi
-  limits_info="[${limit_parts}]"
 fi
 
 # --- Assemble output ---
-# Single line: {{pwd blue}} on {{git_branch green}} [+N|-N][model:effort usedK/size][5h:N%|7d:N%]
-printf "%s%s %s%s%s" \
-  "$shortened_dir" \
-  "$git_branch_info" \
-  "$git_diff_info" \
-  "$context_info" \
-  "$limits_info"
+# Line 1: {{pwd blue}} on {{git_branch green}} [+N|-N]
+# Line 2 (when model is known): {model}:{effort} | ctx:{used}/{total} [| 5h:{pct}% bar][| 7d:{pct}% bar]
+if [ -n "$second_line" ]; then
+  printf "%s%s %s\n%s" \
+    "$shortened_dir" \
+    "$git_branch_info" \
+    "$git_diff_info" \
+    "$second_line"
+else
+  printf "%s%s %s" \
+    "$shortened_dir" \
+    "$git_branch_info" \
+    "$git_diff_info"
+fi
