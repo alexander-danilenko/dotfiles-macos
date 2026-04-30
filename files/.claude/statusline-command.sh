@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Claude Code status line script
 # ~/.claude/statusline-command.sh
-# Template: [model:effort] {{pwd blue}} on {{git_branch green}} [+N|-N][ctx: N%/size]
+# Template: {{pwd blue}} on {{git_branch green}} [+N|-N][model:effort usedK/size]
 
 input=$(cat)
 
@@ -64,6 +64,7 @@ fi
 context_info=""
 used_pct=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 ctx_window=$(echo "$input" | jq -r '.context_window.context_window_size // empty')
+ctx_input_tokens=$(echo "$input" | jq -r '.context_window.current_usage.input_tokens // empty')
 
 # Format context window size as K or M
 ctx_size_label=""
@@ -76,6 +77,12 @@ if [ -n "$ctx_window" ] && [ "$ctx_window" != "null" ]; then
   fi
 fi
 
+# Format used tokens as rounded K value (e.g. 123456 → 123K)
+ctx_used_label=""
+if [ -n "$ctx_input_tokens" ] && [ "$ctx_input_tokens" != "null" ]; then
+  ctx_used_label=$(awk "BEGIN { printf \"%.0fK\", $ctx_input_tokens/1000 }")
+fi
+
 if [ -n "$used_pct" ]; then
   pct_int=$(printf "%.0f" "$used_pct")
   if [ "$pct_int" -le 60 ]; then
@@ -85,10 +92,16 @@ if [ -n "$used_pct" ]; then
   else
     ctx_color="$red"      # red — nearly exhausted
   fi
-  if [ -n "$ctx_size_label" ]; then
-    context_info=$(printf "[ctx: ${ctx_color}%d%%${reset}/%s]" "$pct_int" "$ctx_size_label")
+
+  # Build the used/size portion — use printf so \033 escapes in color vars are interpreted
+  if [ -n "$ctx_used_label" ] && [ -n "$ctx_size_label" ]; then
+    ctx_tokens_str=$(printf "${ctx_color}%s${reset}/%s" "$ctx_used_label" "$ctx_size_label")
+  elif [ -n "$ctx_used_label" ]; then
+    ctx_tokens_str=$(printf "${ctx_color}%s${reset}" "$ctx_used_label")
+  elif [ -n "$ctx_size_label" ]; then
+    ctx_tokens_str=$(printf "${ctx_color}%d%%${reset}/%s" "$pct_int" "$ctx_size_label")
   else
-    context_info=$(printf "[ctx: ${ctx_color}%d%%${reset}]" "$pct_int")
+    ctx_tokens_str=$(printf "${ctx_color}%d%%${reset}" "$pct_int")
   fi
 fi
 
@@ -144,14 +157,65 @@ if [ -n "$model_id" ]; then
     effort="default"
   fi
 
-  model_info=$(printf "[${model_color}%s${reset}:${model_color}%s${reset}]" "$short_name" "$effort")
+  model_info=$(printf "${model_color}%s${reset}:${model_color}%s${reset}" "$short_name" "$effort")
+fi
+
+# --- Combine model+effort with context into a single bracket ---
+# Format: [model:effort usedK/size]
+if [ -n "$model_info" ] && [ -n "$used_pct" ]; then
+  context_info="[${model_info} ${ctx_tokens_str}]"
+elif [ -n "$model_info" ]; then
+  context_info="[${model_info}]"
+elif [ -n "$used_pct" ]; then
+  context_info="[${ctx_tokens_str}]"
+fi
+
+# --- Usage / Rate Limits (5-hour and 7-day) ---
+# Compact inline bracket appended to the main line.
+# Only rendered when at least one limit is present in the JSON.
+# Format: [5h:<pct>%|7d:<pct>%]  — each token colored by its own threshold.
+# Color thresholds: <=60% green, <=80% yellow, >80% red.
+limits_info=""
+five_pct=$(echo "$input" | jq -r '.rate_limits.five_hour.used_percentage // empty')
+week_pct=$(echo "$input" | jq -r '.rate_limits.seven_day.used_percentage // empty')
+
+limit_token() {
+  local label="$1"
+  local pct_float="$2"
+  local pct_int
+  pct_int=$(printf "%.0f" "$pct_float")
+  local tok_color
+  if [ "$pct_int" -le 60 ]; then
+    tok_color="$green"
+  elif [ "$pct_int" -le 80 ]; then
+    tok_color="$yellow"
+  else
+    tok_color="$red"
+  fi
+  printf "${tok_color}%s:%d%%${reset}" "$label" "$pct_int"
+}
+
+if [ -n "$five_pct" ] || [ -n "$week_pct" ]; then
+  limit_parts=""
+  if [ -n "$five_pct" ]; then
+    limit_parts="$(limit_token "5h" "$five_pct")"
+  fi
+  if [ -n "$week_pct" ]; then
+    tok_7d="$(limit_token "7d" "$week_pct")"
+    if [ -n "$limit_parts" ]; then
+      limit_parts="${limit_parts}|${tok_7d}"
+    else
+      limit_parts="$tok_7d"
+    fi
+  fi
+  limits_info="[${limit_parts}]"
 fi
 
 # --- Assemble output ---
-# Template: [model:effort] {{pwd blue}} on {{git_branch green}} [+N|-N][ctx: N%/size]
-printf "%s %s%s %s%s" \
-  "$model_info" \
+# Single line: {{pwd blue}} on {{git_branch green}} [+N|-N][model:effort usedK/size][5h:N%|7d:N%]
+printf "%s%s %s%s%s" \
   "$shortened_dir" \
   "$git_branch_info" \
   "$git_diff_info" \
-  "$context_info"
+  "$context_info" \
+  "$limits_info"
