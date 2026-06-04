@@ -1,6 +1,6 @@
 # Brewfile - macOS Development Environment
 # Generated from dotfiles-macos configuration
-# 
+#
 # Install with: brew bundle
 
 # =============================================================================
@@ -9,14 +9,19 @@
 
 # File management and utilities
 #brew "ffmpeg"                # Complete, cross-platform solution for audio/video
+brew "fd"                    # Simple, fast and user-friendly alternative to find
 brew "jq"                    # Lightweight and flexible command-line JSON processor
 brew "mc"                    # Midnight Commander - visual file manager
 brew "neofetch"              # Fast, highly customizable system info script
 brew "nvm"                   # Node Version Manager - manage multiple Node.js versions
+brew "ripgrep"               # Search tool like grep and The Silver Searcher
 brew "tldr"                  # Simplified and community-driven man pages
 brew "tree"                  # Display directory structure in tree format
 brew "uv"                    # Fast Python package manager and project manager
 brew "yq"                    # Portable command-line YAML processor
+
+# Development
+brew "act"                   # Run your GitHub Actions locally
 
 # PHP development
 brew "php"                   # PHP runtime and CLI interpreter
@@ -65,8 +70,8 @@ cask "orbstack"               # Fast, lightweight alternative to Docker Desktop
 # =============================================================================
 
 # Code editors
-cask "cursor"                # AI-powered code editor
 cask "visual-studio-code"    # Microsoft Visual Studio Code editor
+cask "zed"                   # High-performance, multiplayer code editor
 
 # Development utilities
 cask "jetbrains-toolbox"     # JetBrains IDEs management tool
@@ -74,9 +79,13 @@ cask "meld"                  # Visual diff and merge tool for comparing files an
 cask "postman"               # API development and testing platform
 
 # VS Code extensions
-vscode "GitHub.copilot"                       # GitHub Copilot!
+vscode "GitHub.copilot-chat"                  # GitHub Copilot!
 vscode "GitHub.vscode-github-actions"         # Github Actions support
+vscode "aaron-bond.better-comments"           # Highlight and categorize code comments
 vscode "acarreiro.calculate"                  # Calculates inline math expr
+vscode "alefragnani.Bookmarks"                # Mark lines and jump between bookmarks
+vscode "bierner.markdown-mermaid"             # Mermaid diagram support in Markdown preview
+vscode "christian-kohler.path-intellisense"   # Autocomplete filenames in paths
 vscode "dakara.transformer"                   # Filter, Sort, Unique, Reverse, Align, CSV, Line Selection, Text Transformations and Macros
 vscode "dotenv.dotenv-vscode"                 # .env support
 vscode "editorconfig.editorconfig"            # EditorConfig support
@@ -86,6 +95,8 @@ vscode "golang.go"                            # Golang support
 vscode "ms-python.python"                     # Python support
 vscode "pkief.material-icon-theme"            # Material Icon Theme
 vscode "tyriar.lorem-ipsum"                   # Lorem Ipsum generator
+vscode "usernamehw.errorlens"                 # Inline error and warning highlights
+vscode "yzhang.markdown-all-in-one"           # All-in-one Markdown editing tools
 
 vscode "Gydunhn.vsc-essentials-core" # Essentials Core
 vscode "Gydunhn.typescript-essentials" # TypeScript Essentials
@@ -97,15 +108,10 @@ vscode "Gydunhn.typescript-essentials" # TypeScript Essentials
 # AI and productivity tools
 cask "claude"                # Anthropic's AI assistant
 # cask "chatgpt"             # OpenAI ChatGPT desktop app (optional - uncomment if needed)
-cask "msty"                  # AI-powered code completion and chat assistant
+#cask "msty"                 # AI-powered code completion and chat assistant
 cask "obsidian"              # Knowledge management and note-taking app
 cask "ollama-app"            # Ollama desktop app for running large language models locally
 # cask "lm-studio"           # Local AI model runner (optional - uncomment if needed)
-
-# Apple Office Suite (Mac App Store)
-mas "Keynote", id: 409183694     # Apple presentation software
-mas "Numbers", id: 409203825     # Apple spreadsheet application
-mas "Pages", id: 409201541       # Apple word processor
 
 # Office Suite
 cask "libreoffice"              # Free and open-source office suite
@@ -117,7 +123,6 @@ cask "telegram-desktop"      # Secure desktop Telegram client (Homebrew cask)
 cask "zoom"                  # Video conferencing and communication platform
 
 # Developer tools (Mac App Store)
-mas "ColorSlurp", id: 1287239339     # Ultimate color picker for designers and developers
 mas "JSON Peep for Safari", id: 1458969831  # Safari extension for viewing JSON responses
 
 # File synchronization
@@ -131,7 +136,7 @@ cask "protonvpn"             # VPN service for privacy and security
 # Web browsers
 cask "firefox@developer-edition"  # Firefox Developer Edition
 cask "google-chrome"         # Google Chrome web browser
-cask "vivaldi"              # Vivaldi browser with advanced customization features
+#cask "vivaldi"              # Vivaldi browser with advanced customization features
 
 # =============================================================================
 # FONTS
@@ -168,7 +173,7 @@ cask 'webpquicklook',  args: { require_sha: false } # QL for WebP image files
 cask "aldente"                # Battery charge limiter for MacBooks
 
 # Keyboard customization
-cask "karabiner-elements"     # Keyboard customizer for macOS
+#cask "karabiner-elements"     # Keyboard customizer for macOS
 
 # Archive and compression tools
 cask "keka"                  # File archiver and compressor for macOS
