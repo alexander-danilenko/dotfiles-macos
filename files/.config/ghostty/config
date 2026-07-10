@@ -4,6 +4,6 @@
 # Show all: ghostty +list-themes
 theme="Github Dark"
 # Show all: ghostty +list-fonts
-font-family="JetBrainsMono NFM Regular"
+font-family="JetBrains Mono NL Medium"
 font-size=13
 shell-integration="detect"
