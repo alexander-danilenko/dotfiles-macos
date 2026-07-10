@@ -2,7 +2,7 @@
 # Config Location: "$HOME/.config/ghostty/config"
 
 # Show all: ghostty +list-themes
-theme="Github Dark"
+theme="Github Dark Dimmed"
 # Show all: ghostty +list-fonts
 font-family="JetBrains Mono NL Medium"
 font-size=13
