@@ -22,6 +22,7 @@ brew "yq"                    # Portable command-line YAML processor
 
 # Development
 brew "act"                   # Run your GitHub Actions locally
+brew "go"                    # Go toolchain - required by the Claude Code status line
 
 # PHP development
 brew "php"                   # PHP runtime and CLI interpreter

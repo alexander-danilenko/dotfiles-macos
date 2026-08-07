@@ -24,7 +24,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "node $HOME/.claude/statusline-command.js"
+    "command": "go run $HOME/.claude/statusline-command.go"
   },
   "effortLevel": "xhigh",
   "autoMemoryEnabled": true,
