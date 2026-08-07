@@ -164,10 +164,18 @@ func limitBar(label string, l limit) string {
 }
 
 func main() {
+	// --- Bail early when there's no session JSON to read, e.g. `go run` from a plain terminal ---
+	if fi, err := os.Stdin.Stat(); err == nil && fi.Mode()&os.ModeCharDevice != 0 {
+		fmt.Fprintln(os.Stderr, "statusline: no input on stdin; this command must be run by Claude Code, not directly")
+		os.Exit(1)
+	}
+
 	// --- Read & parse input once ---
 	var in input
-	if raw, err := io.ReadAll(os.Stdin); err == nil {
-		_ = json.Unmarshal(raw, &in) // malformed input → zero value, same as the JS fallback
+	raw, err := io.ReadAll(os.Stdin)
+	if err != nil || len(raw) == 0 || json.Unmarshal(raw, &in) != nil || (in.Workspace.CurrentDir == "" && in.Model.ID == "") {
+		fmt.Fprintln(os.Stderr, "statusline: no valid Claude Code session data on stdin")
+		os.Exit(1)
 	}
 
 	var v view
