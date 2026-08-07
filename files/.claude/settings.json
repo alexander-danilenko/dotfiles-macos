@@ -24,9 +24,11 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "go run $HOME/.claude/statusline-command.go"
+    "command": "go run $HOME/.claude/statusline-command.go",
+    "refreshInterval": 30
   },
   "effortLevel": "xhigh",
+  "tui": "fullscreen",
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
   "skipDangerousModePermissionPrompt": true,
@@ -34,6 +36,5 @@
   "editorMode": "normal",
   "preferredNotifChannel": "ghostty",
   "agentPushNotifEnabled": false,
-  "skipAutoPermissionPrompt": true,
-  "tui": "fullscreen"
+  "skipAutoPermissionPrompt": true
 }

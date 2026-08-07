@@ -143,7 +143,7 @@ func modelVersion(id, family string) string {
 	return major.FindString(dotted)
 }
 
-// limitBar builds a rate-limit segment: {label}:{pct}% {bar} {X.XXh}.
+// limitBar builds a rate-limit segment: {label}:{pct}% {bar} {H:MM until reset}.
 func limitBar(label string, l limit) string {
 	const barWidth = 10
 	pct := int(math.Round(*l.UsedPercentage))
@@ -158,7 +158,7 @@ func limitBar(label string, l limit) string {
 	resetStr := ""
 	if l.ResetsAt != nil {
 		secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
-		resetStr = fmt.Sprintf(" %.2fh", float64(secsLeft)/3600)
+		resetStr = fmt.Sprintf(" %d:%02d", secsLeft/3600, secsLeft%3600/60)
 	}
 	return fmt.Sprintf("%s:%s%d%% %s%s%s", label, pctColor(pct), pct, bar, reset, resetStr)
 }
