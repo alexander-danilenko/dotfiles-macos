@@ -1,5 +1,6 @@
-// Claude Code status line, run via `go run`. Parses the JSON on stdin once,
-// shells out only for git, and renders through text/template.
+// Claude Code status line. Build with a bare `go build` in this directory.
+// Parses the JSON on stdin once, shells out only for git, and renders through
+// text/template.
 // Template:
 //
 //	Line 1: {{pwd blue}} on {{git_branch green}} [+N|-N]
