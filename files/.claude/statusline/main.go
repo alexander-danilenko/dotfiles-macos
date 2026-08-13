@@ -1,43 +1,46 @@
-// Claude Code status line. Build with a bare `go build` in this directory.
-// Parses the JSON on stdin once, shells out only for git, and renders through
-// text/template.
-// Template:
+// Claude Code status line. Build the binary with `go build` in this directory.
+// The program reads the session JSON from stdin and runs git for the branch and
+// the diff counts. It prints two lines and omits the empty segments:
 //
-//	Line 1: {{pwd blue}} on {{git_branch green}} [+N|-N]
-//	Line 2: {model}:{effort} | ctx:{used}/{total} [| $cost][| 5h:{pct}% bar][| 7d:{pct}% bar]
+//	{directory} on {branch} [+N|-N] | {cost}
+//	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} {bar} | {7d limit} {bar}
+//
+// Each limit segment shows the time until the limit resets.
 package main
 
 import (
+	"cmp"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math"
 	"os"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template"
 	"time"
 )
 
-// --- ANSI helpers ---
+// --- ANSI colors ---
 const (
-	reset = "\x1b[0m"
-	green = "\x1b[32m"
-	yello = "\x1b[33m"
-	red   = "\x1b[31m"
-	blue  = "\x1b[34m"
-	money = "\x1b[38;5;78m" // soft green for the API-equivalent $ cost
+	reset  = "\x1b[0m"
+	green  = "\x1b[32m"
+	yello  = "\x1b[33m"
+	orange = "\x1b[38;5;208m"
+	red    = "\x1b[31m"
+	blue   = "\x1b[34m"
+	money  = "\x1b[38;5;78m" // soft green for the cost in dollars
 
-	// RPG rarity colors (256-color) for model families.
-	// Rare → Haiku, Epic → Sonnet, Legendary → Opus.
-	// Danger (crimson) → Fable, Mythos: high-cost models, flagged visually.
-	rarityRare      = "\x1b[38;5;69m"        // Haiku
-	rarityEpic      = "\x1b[38;5;135m"       // Sonnet
-	rarityLegendary = "\x1b[38;5;220m"       // Opus
-	colorDanger     = "\x1b[38;2;220;20;60m" // Fable / Mythos — crimson #DC143C (cost warning)
-	colorFallback   = "\x1b[38;5;246m"       // unknown/fallback
+	// RPG rarity colors (256-color) for the model families.
+	// Rare is Haiku, Epic is Sonnet, Legendary is Opus.
+	// Danger (crimson) marks Fable and Mythos, the high-cost models.
+	rarityRare      = "\x1b[38;5;69m"
+	rarityEpic      = "\x1b[38;5;135m"
+	rarityLegendary = "\x1b[38;5;220m"
+	colorDanger     = "\x1b[38;2;220;20;60m" // crimson #DC143C, a cost warning
+	colorFallback   = "\x1b[38;5;246m"       // unknown model
 )
 
 type limit struct {
@@ -59,7 +62,7 @@ type input struct {
 		UsedPercentage    *float64 `json:"used_percentage"`
 		ContextWindowSize *float64 `json:"context_window_size"`
 	} `json:"context_window"`
-	// Field name has varied across Claude Code versions; probe the known spellings.
+	// The field name changed between Claude Code versions. Read all three spellings.
 	Cost struct {
 		TotalCostUsd *float64 `json:"total_cost_usd"`
 		TotalCostCC  *float64 `json:"totalCost"`
@@ -71,22 +74,34 @@ type input struct {
 	} `json:"rate_limits"`
 }
 
-// view is what the template renders. Every field is already colored.
+// view holds the segments of both lines. Each segment carries its own color.
 type view struct {
-	Dir    string
-	Branch string
-	Diff   string
-	Model  string
-	Ctx    string
-	Cost   string
-	Limits []string
+	Dir     string
+	Branch  string
+	Diff    string
+	Model   string
+	Ctx     string
+	Cost    string
+	Limit5h string
+	Limit7d string
 }
 
-const layout = `{{.Dir}}{{.Branch}} {{.Diff}}` +
-	`{{if .Model}}
-{{.Model}}{{with .Ctx}} | ctx:{{.}}{{end}}{{with .Cost}} | {{.}}{{end}}{{range .Limits}} | {{.}}{{end}}{{end}}`
+// layout places the segments. gitStatus sets Branch and Diff together, so one
+// guard covers both. The join function drops the empty segments of line 2.
+const layout = `{{.Dir}}{{with .Branch}} on {{.}} {{$.Diff}}{{end}}{{with .Cost}} | {{.}}{{end}}
+{{join .Model .Ctx .Limit5h .Limit7d}}
+`
 
-// Run git quietly; return "" on any failure (not a repo, git missing, etc.).
+var statusLine = template.Must(template.New("statusline").
+	Funcs(template.FuncMap{"join": join}).Parse(layout))
+
+// join concatenates the segments that are not empty, separated by " | ".
+func join(segments ...string) string {
+	return strings.Join(slices.DeleteFunc(segments, func(s string) bool { return s == "" }), " | ")
+}
+
+// git runs one git command. It returns an empty string after any failure, for
+// example a directory outside a repository or a missing git binary.
 func git(cwd string, args ...string) string {
 	out, err := exec.Command("git", append([]string{"-C", cwd, "--no-optional-locks"}, args...)...).Output()
 	if err != nil {
@@ -95,23 +110,73 @@ func git(cwd string, args ...string) string {
 	return strings.TrimSpace(string(out))
 }
 
-// Color for a percentage: <=60 green, <=80 yellow, else red.
+// gitStatus returns the colored branch name and the line counts of the working
+// tree. Both are empty when cwd is outside a repository.
+func gitStatus(cwd string) (branch, diff string) {
+	// A git process costs about 12 ms and the two commands are independent.
+	// The scan starts first and runs while the branch name arrives.
+	// One `diff HEAD` scan covers both the staged and the unstaged changes.
+	numstat := make(chan string, 1)
+	go func() { numstat <- git(cwd, "diff", "--numstat", "HEAD") }()
+
+	name := git(cwd, "rev-parse", "--abbrev-ref", "HEAD")
+	if name == "" {
+		return "", ""
+	}
+	if name == "HEAD" { // a detached HEAD has no name, so show the short hash
+		name = git(cwd, "rev-parse", "--short", "HEAD")
+	}
+
+	// A binary file reports "-". Atoi then fails and the count stays the same.
+	var additions, deletions int
+	for line := range strings.SplitSeq(<-numstat, "\n") {
+		cols := strings.Split(line, "\t")
+		if len(cols) < 2 {
+			continue
+		}
+		if n, err := strconv.Atoi(cols[0]); err == nil {
+			additions += n
+		}
+		if n, err := strconv.Atoi(cols[1]); err == nil {
+			deletions += n
+		}
+	}
+	return green + name + reset,
+		fmt.Sprintf("[%s+%d%s|%s-%d%s]", green, additions, reset, red, deletions, reset)
+}
+
+// pctColor colors a percentage: 40 or less green, 50 or less yellow,
+// 80 or less orange, above 80 red.
 func pctColor(pct int) string {
 	switch {
-	case pct <= 60:
+	case pct <= 40:
 		return green
-	case pct <= 80:
+	case pct <= 50:
 		return yello
+	case pct <= 80:
+		return orange
 	default:
 		return red
 	}
 }
 
-var (
-	numericPrefix = regexp.MustCompile(`^[0-9]+(?:-[0-9]+)*`)
-	majorMinor    = regexp.MustCompile(`^[0-9]+\.[0-9]+`)
-	major         = regexp.MustCompile(`^[0-9]+`)
-)
+// gauge renders "{value} {bar}". The percentage sets the color and the fill.
+// A nil percentage gives an empty segment, and an empty value gives "{pct}%".
+func gauge(usedPct *float64, value string) string {
+	const barWidth = 10
+	if usedPct == nil {
+		return ""
+	}
+	pct := int(math.Round(*usedPct))
+	if value == "" {
+		value = fmt.Sprintf("%d%%", pct)
+	}
+	filled := min(max(pct*barWidth/100, 0), barWidth)
+	bar := strings.Repeat("■", filled) + strings.Repeat("□", barWidth-filled)
+	return pctColor(pct) + value + " " + bar + reset
+}
+
+var numericPrefix = regexp.MustCompile(`^([0-9]+)(?:-([0-9]+))?`)
 
 // modelFamily maps a model id to its family name and rarity color.
 func modelFamily(id string) (string, string) {
@@ -129,151 +194,124 @@ func modelFamily(id string) (string, string) {
 	return "unknown", colorFallback
 }
 
-// modelVersion strips "claude-" and the family name, then reads leading numeric
-// segments as a version. e.g. claude-opus-4-7 → "4.7"; claude-3-5-sonnet-20241022 → "3.5".
+// modelVersion removes "claude-" and the family name, then reads the first two
+// numeric segments as a version. claude-opus-4-7 gives "4.7", and
+// claude-3-5-sonnet-20241022 gives "3.5".
 func modelVersion(id, family string) string {
-	s := strings.Trim(strings.Join(strings.Split(strings.ReplaceAll(id, "claude-", ""), family), ""), "-")
-	segs := numericPrefix.FindString(s)
-	if segs == "" {
+	s := strings.Trim(strings.ReplaceAll(strings.ReplaceAll(id, "claude-", ""), family, ""), "-")
+	m := numericPrefix.FindStringSubmatch(s)
+	switch {
+	case m == nil:
 		return ""
+	case m[2] != "":
+		return m[1] + "." + m[2]
 	}
-	dotted := strings.ReplaceAll(segs, "-", ".")
-	if v := majorMinor.FindString(dotted); v != "" {
-		return v
-	}
-	return major.FindString(dotted)
+	return m[1]
 }
 
-// limitBar builds a rate-limit segment: {label}:{pct}% {bar} {H:MM until reset}.
-func limitBar(label string, l limit) string {
-	const barWidth = 10
-	pct := int(math.Round(*l.UsedPercentage))
-	filled := pct * barWidth / 100
-	if filled < 0 {
-		filled = 0
-	} else if filled > barWidth {
-		filled = barWidth
+// modelSegment renders "{family}-{version}[{context size}]:{effort}" in the
+// family color, for example "opus-5[1M]:xhigh".
+func modelSegment(id, effort string, window *float64) string {
+	if id == "" {
+		return ""
 	}
-	bar := strings.Repeat("■", filled) + strings.Repeat("□", barWidth-filled)
+	id = strings.ToLower(id)
+	family, color := modelFamily(id)
+	name := family
+	if version := modelVersion(id, family); version != "" {
+		name = family + "-" + version
+	}
+	if window != nil {
+		name += "[" + tokens(*window) + "]"
+	}
+	if effort == "" {
+		effort = "default"
+	}
+	return color + name + reset + ":" + color + effort + reset
+}
 
-	resetStr := ""
+// tokens formats a token count, for example "1M" or "200K".
+func tokens(n float64) string {
+	if n >= 1_000_000 {
+		return fmt.Sprintf("%.0fM", n/1_000_000)
+	}
+	return fmt.Sprintf("%.0fK", n/1000)
+}
+
+// contextGauge shows the tokens in use, for example "70K ■□□□□□□□□□". The token
+// count comes from the percentage, so it agrees with the number Claude Code shows.
+func contextGauge(usedPct, window *float64) string {
+	value := ""
+	if usedPct != nil && window != nil {
+		value = tokens(*usedPct * *window / 100)
+	}
+	return gauge(usedPct, value)
+}
+
+// limitGauge shows the time until the limit resets, next to the usage bar.
+// The value is "1:39" below one day and "5d 20h" above it.
+func limitGauge(l limit) string {
+	value := ""
 	if l.ResetsAt != nil {
 		secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
-		resetStr = fmt.Sprintf(" %d:%02d", secsLeft/3600, secsLeft%3600/60)
+		if hours := secsLeft / 3600; hours >= 24 {
+			value = fmt.Sprintf("%dd %dh", hours/24, hours%24)
+		} else {
+			value = fmt.Sprintf("%d:%02d", hours, secsLeft%3600/60)
+		}
 	}
-	return fmt.Sprintf("%s:%s%d%% %s%s%s", label, pctColor(pct), pct, bar, reset, resetStr)
+	return gauge(l.UsedPercentage, value)
+}
+
+// costSegment formats the first cost that the session reports. The value is the
+// API price of these tokens.
+func costSegment(costs ...*float64) string {
+	c := cmp.Or(costs...)
+	if c == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s$%.2f%s", money, *c, reset)
+}
+
+// dirSegment shortens the home directory to "~" and colors the path.
+func dirSegment(dir string) string {
+	if home, err := os.UserHomeDir(); err == nil {
+		if rest, found := strings.CutPrefix(dir, home); found {
+			dir = "~" + rest
+		}
+	}
+	return blue + dir + reset
 }
 
 func main() {
-	// --- Bail early when there's no session JSON to read, e.g. `go run` from a plain terminal ---
+	// Stop early when stdin is a terminal. A direct `go run` carries no session JSON.
 	if fi, err := os.Stdin.Stat(); err == nil && fi.Mode()&os.ModeCharDevice != 0 {
-		fmt.Fprintln(os.Stderr, "statusline: no input on stdin; this command must be run by Claude Code, not directly")
+		fmt.Fprintln(os.Stderr, "statusline: no input on stdin; Claude Code must run this command")
 		os.Exit(1)
 	}
 
-	// --- Read & parse input once ---
+	// Empty input ends the decode with io.EOF, which fails here too.
 	var in input
-	raw, err := io.ReadAll(os.Stdin)
-	if err != nil || len(raw) == 0 || json.Unmarshal(raw, &in) != nil || (in.Workspace.CurrentDir == "" && in.Model.ID == "") {
+	if json.NewDecoder(os.Stdin).Decode(&in) != nil || (in.Workspace.CurrentDir == "" && in.Model.ID == "") {
 		fmt.Fprintln(os.Stderr, "statusline: no valid Claude Code session data on stdin")
 		os.Exit(1)
 	}
 
-	var v view
-
-	// --- Working Directory (home dir → ~), blue foreground ---
 	cwd := in.Workspace.CurrentDir
 	if cwd == "" {
 		cwd, _ = os.Getwd()
 	}
-	dir := cwd
-	if home := os.Getenv("HOME"); home != "" && strings.HasPrefix(cwd, home) {
-		dir = "~" + cwd[len(home):]
-	}
-	v.Dir = blue + dir + reset
+	branch, diff := gitStatus(cwd)
+	ctx := in.ContextWindow
 
-	// --- Git Branch & Diff Stats ---
-	if branch := git(cwd, "rev-parse", "--abbrev-ref", "HEAD"); branch != "" {
-		// Detached HEAD prints "HEAD"; fall back to short SHA to match prior behavior.
-		label := branch
-		if branch == "HEAD" {
-			label = git(cwd, "rev-parse", "--short", "HEAD")
-		}
-		v.Branch = " on " + green + label + reset
-
-		// Sum additions/deletions across all working-tree changes vs HEAD, skipping binaries ('-').
-		// One `diff HEAD` scan replaces an unstaged+staged pair.
-		var additions, deletions int
-		for line := range strings.SplitSeq(git(cwd, "diff", "--numstat", "HEAD"), "\n") {
-			cols := strings.Split(line, "\t")
-			if len(cols) < 2 {
-				continue
-			}
-			if n, err := strconv.Atoi(cols[0]); err == nil {
-				additions += n
-			}
-			if n, err := strconv.Atoi(cols[1]); err == nil {
-				deletions += n
-			}
-		}
-		v.Diff = fmt.Sprintf("[%s+%d%s|%s-%d%s]", green, additions, reset, red, deletions, reset)
-	}
-
-	// --- Context Usage (color-coded) ---
-	// Used tokens derived from used_percentage × context_window_size so the K value
-	// stays consistent with the percentage Claude Code itself displays.
-	usedPct, ctxWindow := in.ContextWindow.UsedPercentage, in.ContextWindow.ContextWindowSize
-
-	sizeLabel := ""
-	if ctxWindow != nil {
-		if w := math.Round(*ctxWindow); w >= 1_000_000 {
-			sizeLabel = fmt.Sprintf("%.0fM", math.Round(w/1_000_000))
-		} else {
-			sizeLabel = fmt.Sprintf("%.0fK", math.Round(w/1000))
-		}
-	}
-	switch {
-	case usedPct != nil && ctxWindow != nil:
-		used := math.Round(*usedPct * *ctxWindow / 100 / 1000)
-		v.Ctx = fmt.Sprintf("%s%.0fK%s/%s", pctColor(int(math.Round(*usedPct))), used, reset, sizeLabel)
-	case usedPct != nil:
-		pct := int(math.Round(*usedPct))
-		v.Ctx = fmt.Sprintf("%s%d%%%s", pctColor(pct), pct, reset)
-	case sizeLabel != "":
-		v.Ctx = "?/" + sizeLabel
-	}
-
-	// --- Model & Effort (RPG-rarity color-coded by model family) ---
-	if in.Model.ID != "" {
-		id := strings.ToLower(in.Model.ID)
-		family, color := modelFamily(id)
-
-		shortName := family
-		if version := modelVersion(id, family); version != "" {
-			shortName = family + "-" + version
-		}
-		effort := in.Effort.Level
-		if effort == "" {
-			effort = "default"
-		}
-		v.Model = fmt.Sprintf("%s%s%s:%s%s%s", color, shortName, reset, color, effort, reset)
-	}
-
-	// --- Session cost (API-equivalent $, what these tokens would cost pay-as-you-go) ---
-	for _, c := range []*float64{in.Cost.TotalCostUsd, in.Cost.TotalCostCC, in.Cost.TotalCost} {
-		if c != nil {
-			v.Cost = fmt.Sprintf("%s$%.2f%s", money, *c, reset)
-			break
-		}
-	}
-
-	// --- Rate limits ---
-	if in.RateLimits.FiveHour.UsedPercentage != nil {
-		v.Limits = append(v.Limits, limitBar("5h", in.RateLimits.FiveHour))
-	}
-	if in.RateLimits.SevenDay.UsedPercentage != nil {
-		v.Limits = append(v.Limits, limitBar("7d", in.RateLimits.SevenDay))
-	}
-
-	template.Must(template.New("statusline").Parse(layout)).Execute(os.Stdout, v)
+	statusLine.Execute(os.Stdout, view{
+		Dir:     dirSegment(cwd),
+		Branch:  branch,
+		Diff:    diff,
+		Model:   modelSegment(in.Model.ID, in.Effort.Level, ctx.ContextWindowSize),
+		Ctx:     contextGauge(ctx.UsedPercentage, ctx.ContextWindowSize),
+		Cost:    costSegment(in.Cost.TotalCostUsd, in.Cost.TotalCostCC, in.Cost.TotalCost),
+		Limit5h: limitGauge(in.RateLimits.FiveHour),
+		Limit7d: limitGauge(in.RateLimits.SevenDay),
+	})
 }
