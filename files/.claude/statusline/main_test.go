@@ -1,33 +1,47 @@
 package main
 
 import (
+	"math"
 	"testing"
 	"time"
 )
 
-func TestPaceColor(t *testing.T) {
+func TestPace(t *testing.T) {
 	const window = 5 * 60 * 60
 	for _, c := range []struct {
-		name           string
-		usedPct, gone  float64 // gone is the share of the window that has passed
-		want, wantName string
+		name          string
+		usedPct, gone float64 // gone is the share of the window that has passed
+		want          float64
+		wantColor     string
+		colorName     string
 	}{
-		{"on pace", 10, 0.10, green, "green"},
-		{"under pace", 25, 0.50, green, "green"},
-		{"burst early", 50, 0.10, red, "red"},
-		{"the same burst, an hour of idling later", 50, 0.30, orange, "orange"},
-		{"and later still", 50, 0.45, yello, "yellow"},
-		{"nearly spent but nearly reset", 90, 0.95, green, "green"},
-		{"a trickle in the first minute", 2, 0.003, green, "green"},
+		{"on pace", 10, 0.10, 1.0, green, "green"},
+		{"under pace", 25, 0.50, 0.5, green, "green"},
+		{"burst early", 50, 0.10, 5.0, red, "red"},
+		{"the same burst, an hour of idling later", 50, 0.30, 1.667, orange, "orange"},
+		{"and later still", 50, 0.45, 1.111, yello, "yellow"},
+		{"nearly spent but nearly reset", 90, 0.95, 0.947, green, "green"},
+		{"a trickle in the first minute", 2, 0.003, 0.4, green, "green"},
+		{"the whole limit at once, the ceiling", 100, 0, 20, red, "red"},
+		{"an untouched window", 0, 0, 0, green, "green"},
 	} {
-		if got := paceColor(c.usedPct, window*(1-c.gone), window); got != c.want {
-			t.Errorf("%s: %.0f%% used with %.0f%% of the window gone is %q, want %s",
-				c.name, c.usedPct, c.gone*100, got, c.wantName)
+		got := pace(c.usedPct, window*(1-c.gone), window)
+		if math.Abs(got-c.want) > 0.001 {
+			t.Errorf("%s: %.0f%% used with %.0f%% of the window gone paces %.3f, want %.3f",
+				c.name, c.usedPct, c.gone*100, got, c.want)
+		}
+		if color := paceColor(got); color != c.wantColor {
+			t.Errorf("%s: pace %.3f is %q, want %s", c.name, got, color, c.colorName)
 		}
 	}
 	// A 7 day window takes the same treatment, only the length differs.
-	if got := paceColor(50, (7*24*time.Hour).Seconds()*0.9, (7 * 24 * time.Hour).Seconds()); got != red {
-		t.Errorf("half the weekly limit in a tenth of the week is %q, want red", got)
+	week := (7 * 24 * time.Hour).Seconds()
+	if got := pace(50, week*0.9, week); math.Abs(got-5) > 0.001 {
+		t.Errorf("half the weekly limit in a tenth of the week paces %.3f, want 5", got)
+	}
+	// A zero window would divide by zero, so it falls back to the plain usage.
+	if got := pace(50, 0, 0); got != 0.5 {
+		t.Errorf("a zero-length window paces %v, want 0.5", got)
 	}
 }
 

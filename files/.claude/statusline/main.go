@@ -5,9 +5,10 @@
 //	{directory} on {branch} [+N|-N] | {cost}
 //	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} {bar} | {7d limit} {bar}
 //
-// Each limit segment shows the time until the limit resets. Its bar reports the
-// usage and its color reports the pace: green means the current rate still fits
-// inside the window, red means it does not. See paceColor.
+// A limit segment reads "2:00 ×1.8 ■■■■■□□□□□": the time until the reset, the
+// pace, and the usage. The bar and the multiplier answer different questions,
+// so both earn their place. The bar reports what is already spent, while the
+// multiplier and the color report where the current rate lands. See pace.
 package main
 
 import (
@@ -163,19 +164,30 @@ func pctColor(pct float64) string {
 	}
 }
 
-// paceColor colors a rate limit by the usage it projects at the reset: the
-// share of the limit spent divided by the share of the window that has passed.
-// 1.0 lands exactly on the limit, so green covers everything that still fits.
+// pace returns the usage a rate limit projects at its reset: the share of the
+// limit spent divided by the share of the window that has passed. 1.0 lands
+// exactly on the limit, so anything below it still fits.
 //
-// Half the limit in a tenth of the window projects to five limits and reads
-// red. The same usage an hour later projects lower, so a session that pauses
-// turns green again without doing anything.
-func paceColor(usedPct, secsLeft, windowSecs float64) string {
+// Half the limit in a tenth of the window projects to five limits. The same
+// usage an hour later projects lower, so a session that pauses recovers on its
+// own. The value tops out at 20, the whole limit against the elapsed floor.
+func pace(usedPct, secsLeft, windowSecs float64) float64 {
+	if windowSecs <= 0 { // no window is no forecast, so report the plain usage
+		return usedPct / 100
+	}
 	elapsed := (windowSecs - min(secsLeft, windowSecs)) / windowSecs
 	// The first minutes of a window carry no signal: any usage divided by an
 	// elapsed share near zero projects to a huge number. The floor is 5% of the
-	// window, which is 15 minutes of the 5 hour one.
-	switch projected := usedPct / 100 / max(elapsed, 0.05); {
+	// window, which is 15 minutes of the 5 hour one. It also keeps the divisor
+	// away from zero, which an idle window at its very start would otherwise hit.
+	return usedPct / 100 / max(elapsed, 0.05)
+}
+
+// paceColor keeps the color categorical while the printed multiplier carries
+// the precision. A continuous gradient would duplicate what the number already
+// says, and it would cost the glance that tells green from red without reading.
+func paceColor(projected float64) string {
+	switch {
 	case projected <= 1.00:
 		return green
 	case projected <= 1.25:
@@ -295,8 +307,9 @@ func limitGauge(l limit, window time.Duration) string {
 		return gauge(*l.UsedPercentage, "", pctColor(*l.UsedPercentage))
 	}
 	secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
-	color := paceColor(*l.UsedPercentage, float64(secsLeft), window.Seconds())
-	return gauge(*l.UsedPercentage, untilReset(secsLeft), color)
+	projected := pace(*l.UsedPercentage, float64(secsLeft), window.Seconds())
+	value := fmt.Sprintf("%s ×%.1f", untilReset(secsLeft), projected)
+	return gauge(*l.UsedPercentage, value, paceColor(projected))
 }
 
 // costSegment formats the first cost that the session reports. The value is the
