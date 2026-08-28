@@ -5,7 +5,9 @@
 //	{directory} on {branch} [+N|-N] | {cost}
 //	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} {bar} | {7d limit} {bar}
 //
-// Each limit segment shows the time until the limit resets.
+// Each limit segment shows the time until the limit resets. Its bar reports the
+// usage and its color reports the pace: green means the current rate still fits
+// inside the window, red means it does not. See paceColor.
 package main
 
 import (
@@ -145,9 +147,10 @@ func gitStatus(cwd string) (branch, diff string) {
 		fmt.Sprintf("[%s+%d%s|%s-%d%s]", green, additions, reset, red, deletions, reset)
 }
 
-// pctColor colors a percentage: 40 or less green, 50 or less yellow,
-// 80 or less orange, above 80 red.
-func pctColor(pct int) string {
+// pctColor colors a plain percentage: 40 or less green, 50 or less yellow,
+// 80 or less orange, above 80 red. It suits a quantity with no deadline, such
+// as the context window.
+func pctColor(pct float64) string {
 	switch {
 	case pct <= 40:
 		return green
@@ -160,20 +163,41 @@ func pctColor(pct int) string {
 	}
 }
 
-// gauge renders "{value} {bar}". The percentage sets the color and the fill.
-// A nil percentage gives an empty segment, and an empty value gives "{pct}%".
-func gauge(usedPct *float64, value string) string {
-	const barWidth = 10
-	if usedPct == nil {
-		return ""
+// paceColor colors a rate limit by the usage it projects at the reset: the
+// share of the limit spent divided by the share of the window that has passed.
+// 1.0 lands exactly on the limit, so green covers everything that still fits.
+//
+// Half the limit in a tenth of the window projects to five limits and reads
+// red. The same usage an hour later projects lower, so a session that pauses
+// turns green again without doing anything.
+func paceColor(usedPct, secsLeft, windowSecs float64) string {
+	elapsed := (windowSecs - min(secsLeft, windowSecs)) / windowSecs
+	// The first minutes of a window carry no signal: any usage divided by an
+	// elapsed share near zero projects to a huge number. The floor is 5% of the
+	// window, which is 15 minutes of the 5 hour one.
+	switch projected := usedPct / 100 / max(elapsed, 0.05); {
+	case projected <= 1.00:
+		return green
+	case projected <= 1.25:
+		return yello
+	case projected <= 2.00:
+		return orange
 	}
-	pct := int(math.Round(*usedPct))
+	return red
+}
+
+// gauge renders "{value} {bar}". The percentage sets the fill and the caller
+// sets the color, so the bar reports the usage while the color reports the
+// pace. An empty value gives "{pct}%".
+func gauge(usedPct float64, value, color string) string {
+	const barWidth = 10
+	pct := int(math.Round(usedPct))
 	if value == "" {
 		value = fmt.Sprintf("%d%%", pct)
 	}
 	filled := min(max(pct*barWidth/100, 0), barWidth)
 	bar := strings.Repeat("■", filled) + strings.Repeat("□", barWidth-filled)
-	return pctColor(pct) + value + " " + bar + reset
+	return color + value + " " + bar + reset
 }
 
 var numericPrefix = regexp.MustCompile(`^([0-9]+)(?:-([0-9]+))?`)
@@ -241,26 +265,38 @@ func tokens(n float64) string {
 // contextGauge shows the tokens in use, for example "70K ■□□□□□□□□□". The token
 // count comes from the percentage, so it agrees with the number Claude Code shows.
 func contextGauge(usedPct, window *float64) string {
+	if usedPct == nil {
+		return ""
+	}
 	value := ""
-	if usedPct != nil && window != nil {
+	if window != nil {
 		value = tokens(*usedPct * *window / 100)
 	}
-	return gauge(usedPct, value)
+	return gauge(*usedPct, value, pctColor(*usedPct))
 }
 
-// limitGauge shows the time until the limit resets, next to the usage bar.
-// The value is "1:39" below one day and "5d 20h" above it.
-func limitGauge(l limit) string {
-	value := ""
-	if l.ResetsAt != nil {
-		secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
-		if hours := secsLeft / 3600; hours >= 24 {
-			value = fmt.Sprintf("%dd %dh", hours/24, hours%24)
-		} else {
-			value = fmt.Sprintf("%d:%02d", hours, secsLeft%3600/60)
-		}
+// untilReset formats a countdown as "1:39" below one day and "5d 20h" above it.
+func untilReset(secsLeft int64) string {
+	if hours := secsLeft / 3600; hours >= 24 {
+		return fmt.Sprintf("%dd %dh", hours/24, hours%24)
+	} else {
+		return fmt.Sprintf("%d:%02d", hours, secsLeft%3600/60)
 	}
-	return gauge(l.UsedPercentage, value)
+}
+
+// limitGauge shows the time until the limit resets, next to the usage bar. The
+// window length turns the countdown into the elapsed share that paceColor needs.
+// Without a reset time the color falls back to the plain usage.
+func limitGauge(l limit, window time.Duration) string {
+	if l.UsedPercentage == nil {
+		return ""
+	}
+	if l.ResetsAt == nil {
+		return gauge(*l.UsedPercentage, "", pctColor(*l.UsedPercentage))
+	}
+	secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
+	color := paceColor(*l.UsedPercentage, float64(secsLeft), window.Seconds())
+	return gauge(*l.UsedPercentage, untilReset(secsLeft), color)
 }
 
 // costSegment formats the first cost that the session reports. The value is the
@@ -311,7 +347,7 @@ func main() {
 		Model:   modelSegment(in.Model.ID, in.Effort.Level, ctx.ContextWindowSize),
 		Ctx:     contextGauge(ctx.UsedPercentage, ctx.ContextWindowSize),
 		Cost:    costSegment(in.Cost.TotalCostUsd, in.Cost.TotalCostCC, in.Cost.TotalCost),
-		Limit5h: limitGauge(in.RateLimits.FiveHour),
-		Limit7d: limitGauge(in.RateLimits.SevenDay),
+		Limit5h: limitGauge(in.RateLimits.FiveHour, 5*time.Hour),
+		Limit7d: limitGauge(in.RateLimits.SevenDay, 7*24*time.Hour),
 	})
 }
