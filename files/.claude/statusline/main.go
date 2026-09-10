@@ -3,10 +3,10 @@
 // the diff counts. It prints two lines and omits the empty segments:
 //
 //	{directory} on {branch} [+N|-N] | {cost}
-//	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} {bar} | {7d limit} {bar}
+//	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} | {7d limit}
 //
-// A limit segment reads "2:00 ×1.8 ■■■■■□□□□□": the time until the reset, the
-// pace, and the usage. The bar and the multiplier answer different questions,
+// A limit segment reads "×1.8 ■■■■■□□□□□ 2:00": the pace, the usage, and the
+// time until the reset. The bar and the multiplier answer different questions,
 // so both earn their place. The bar reports what is already spent, while the
 // multiplier and the color report where the current rate lands. See pace.
 package main
@@ -198,10 +198,10 @@ func paceColor(projected float64) string {
 	return red
 }
 
-// gauge renders "{value} {bar}". The percentage sets the fill and the caller
-// sets the color, so the bar reports the usage while the color reports the
-// pace. An empty value gives "{pct}%".
-func gauge(usedPct float64, value, color string) string {
+// gauge renders "{value} {bar} {suffix}". The percentage sets the fill and the
+// caller sets the color, so the bar reports the usage while the color reports
+// the pace. An empty value gives "{pct}%"; an empty suffix is left off.
+func gauge(usedPct float64, value, suffix, color string) string {
 	const barWidth = 10
 	pct := int(math.Round(usedPct))
 	if value == "" {
@@ -209,7 +209,10 @@ func gauge(usedPct float64, value, color string) string {
 	}
 	filled := min(max(pct*barWidth/100, 0), barWidth)
 	bar := strings.Repeat("■", filled) + strings.Repeat("□", barWidth-filled)
-	return color + value + " " + bar + reset
+	if suffix != "" {
+		suffix = " " + suffix
+	}
+	return color + value + " " + bar + suffix + reset
 }
 
 var numericPrefix = regexp.MustCompile(`^([0-9]+)(?:-([0-9]+))?`)
@@ -284,7 +287,7 @@ func contextGauge(usedPct, window *float64) string {
 	if window != nil {
 		value = tokens(*usedPct * *window / 100)
 	}
-	return gauge(*usedPct, value, pctColor(*usedPct))
+	return gauge(*usedPct, value, "", pctColor(*usedPct))
 }
 
 // untilReset formats a countdown as "1:39" below one day and "5d 20h" above it.
@@ -304,12 +307,12 @@ func limitGauge(l limit, window time.Duration) string {
 		return ""
 	}
 	if l.ResetsAt == nil {
-		return gauge(*l.UsedPercentage, "", pctColor(*l.UsedPercentage))
+		return gauge(*l.UsedPercentage, "", "", pctColor(*l.UsedPercentage))
 	}
 	secsLeft := max(0, *l.ResetsAt-time.Now().Unix())
 	projected := pace(*l.UsedPercentage, float64(secsLeft), window.Seconds())
-	value := fmt.Sprintf("%s ×%.1f", untilReset(secsLeft), projected)
-	return gauge(*l.UsedPercentage, value, paceColor(projected))
+	value := fmt.Sprintf("×%.1f", projected)
+	return gauge(*l.UsedPercentage, value, untilReset(secsLeft), paceColor(projected))
 }
 
 // costSegment formats the first cost that the session reports. The value is the
