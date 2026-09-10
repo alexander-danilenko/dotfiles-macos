@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"strings"
 	"testing"
 	"time"
 )
@@ -59,6 +60,23 @@ func TestModelName(t *testing.T) {
 		version := modelVersion(c.id, family)
 		if family != c.family || version != c.version {
 			t.Errorf("%s: got %s/%s, want %s/%s", c.id, family, version, c.family, c.version)
+		}
+	}
+}
+
+func TestGaugeBar(t *testing.T) {
+	// The leading edge slants only while the bar is still moving.
+	for _, c := range []struct {
+		usedPct float64
+		want    string
+	}{
+		{0, "··········"},
+		{50, "████◤·····"},
+		{95, "████████◤·"},
+		{100, "██████████"},
+	} {
+		if got := gauge(c.usedPct, "x", "", ""); !strings.Contains(got, c.want) {
+			t.Errorf("%.0f%% renders %q, want a bar of %q", c.usedPct, got, c.want)
 		}
 	}
 }

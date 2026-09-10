@@ -5,7 +5,7 @@
 //	{directory} on {branch} [+N|-N] | {cost}
 //	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} | {7d limit}
 //
-// A limit segment reads "×1.8 ■■■■■□□□□□ 2:00": the pace, the usage, and the
+// A limit segment reads "×1.8 ████◤····· 2:00": the pace, the usage, and the
 // time until the reset. The bar and the multiplier answer different questions,
 // so both earn their place. The bar reports what is already spent, while the
 // multiplier and the color report where the current rate lands. See pace.
@@ -208,7 +208,12 @@ func gauge(usedPct float64, value, suffix, color string) string {
 		value = fmt.Sprintf("%d%%", pct)
 	}
 	filled := min(max(pct*barWidth/100, 0), barWidth)
-	bar := strings.Repeat("■", filled) + strings.Repeat("□", barWidth-filled)
+	empty := barWidth - filled
+	edge := ""
+	if 0 < filled && filled < barWidth {
+		filled, edge = filled-1, "◤" // a bar still moving gets a slanted leading edge
+	}
+	bar := strings.Repeat("█", filled) + edge + strings.Repeat("·", empty)
 	if suffix != "" {
 		suffix = " " + suffix
 	}
@@ -277,7 +282,7 @@ func tokens(n float64) string {
 	return fmt.Sprintf("%.0fK", n/1000)
 }
 
-// contextGauge shows the tokens in use, for example "70K ■□□□□□□□□□". The token
+// contextGauge shows the tokens in use, for example "70K ◤········". The token
 // count comes from the percentage, so it agrees with the number Claude Code shows.
 func contextGauge(usedPct, window *float64) string {
 	if usedPct == nil {
