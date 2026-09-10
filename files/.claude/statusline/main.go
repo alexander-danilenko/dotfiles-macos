@@ -2,8 +2,8 @@
 // The program reads the session JSON from stdin and runs git for the branch and
 // the diff counts. It prints two lines and omits the empty segments:
 //
-//	{directory} on {branch} [+N|-N] | {cost}
 //	{model}[{context size}]:{effort} | {tokens} {bar} | {5h limit} | {7d limit}
+//	{directory} on {branch} [+N|-N] | {cost}
 //
 // A limit segment reads "×1.8 ████◤····· 2:00": the pace, the usage, and the
 // time until the reset. The bar and the multiplier answer different questions,
@@ -90,9 +90,9 @@ type view struct {
 }
 
 // layout places the segments. gitStatus sets Branch and Diff together, so one
-// guard covers both. The join function drops the empty segments of line 2.
-const layout = `{{.Dir}}{{with .Branch}} on {{.}} {{$.Diff}}{{end}}{{with .Cost}} | {{.}}{{end}}
-{{join .Model .Ctx .Limit5h .Limit7d}}
+// guard covers both. The join function drops the empty segments of line 1.
+const layout = `{{join .Model .Ctx .Limit5h .Limit7d}}
+{{.Dir}}{{with .Branch}} on {{.}} {{$.Diff}}{{end}}{{with .Cost}} | {{.}}{{end}}
 `
 
 var statusLine = template.Must(template.New("statusline").
