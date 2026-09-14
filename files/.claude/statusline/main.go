@@ -149,8 +149,8 @@ func gitStatus(cwd string) (branch, diff string) {
 }
 
 // pctColor colors a plain percentage: 40 or less green, 50 or less yellow,
-// 80 or less orange, above 80 red. It suits a quantity with no deadline, such
-// as the context window.
+// 80 or less orange, above 80 red. It is the fallback for a rate limit with no
+// reset time, where usage is all there is to go on. See ctxColor for context.
 func pctColor(pct float64) string {
 	switch {
 	case pct <= 40:
@@ -158,6 +158,23 @@ func pctColor(pct float64) string {
 	case pct <= 50:
 		return yello
 	case pct <= 80:
+		return orange
+	default:
+		return red
+	}
+}
+
+// ctxColor colors the context window by how much room is left, so each band
+// names an action: green fills it freely, yellow spends it deliberately,
+// orange wraps up the current task, red compacts before auto-compact does it
+// and summarizes the transcript away.
+func ctxColor(usedPct float64) string {
+	switch {
+	case usedPct <= 50:
+		return green
+	case usedPct <= 70:
+		return yello
+	case usedPct <= 85:
 		return orange
 	default:
 		return red
@@ -292,7 +309,7 @@ func contextGauge(usedPct, window *float64) string {
 	if window != nil {
 		value = tokens(*usedPct * *window / 100)
 	}
-	return gauge(*usedPct, value, "", pctColor(*usedPct))
+	return gauge(*usedPct, value, "", ctxColor(*usedPct))
 }
 
 // untilReset formats a countdown as "1:39" below one day and "5d 20h" above it.

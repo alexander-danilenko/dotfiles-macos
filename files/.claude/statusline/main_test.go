@@ -80,3 +80,21 @@ func TestGaugeBar(t *testing.T) {
 		}
 	}
 }
+
+func TestCtxColor(t *testing.T) {
+	for _, c := range []struct {
+		usedPct float64
+		want    string
+	}{
+		{50, green},
+		{51, yello},
+		{70, yello},
+		{71, orange},
+		{85, orange},
+		{86, red},
+	} {
+		if got := ctxColor(c.usedPct); got != c.want {
+			t.Errorf("%.0f%%: got %q, want %q", c.usedPct, got, c.want)
+		}
+	}
+}
