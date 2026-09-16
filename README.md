@@ -12,6 +12,7 @@
     - [ZSH with Oh My Zsh](#zsh-with-oh-my-zsh)
 - [Development](#development)
   - [Visual Studio Code](#visual-studio-code)
+  - [Claude Code](#claude-code)
 - [Containerization](#containerization)
   - [Docker](#docker)
   - [Docksal](#docksal)
@@ -117,6 +118,23 @@ curl -O https://raw.githubusercontent.com/alexander-danilenko/dotfiles-macos/ref
 ```
 
 > **Note**: VS Code extensions are now managed via the [Brewfile](#quick-setup-with-brewfile) and will be installed automatically with `brew bundle`.
+
+### Claude Code
+
+Install marketplaces and plugins (`repo:plugin` pairs):
+
+```shell
+for entry in \
+  alexander-danilenko/cortex-ai-skills:cortex \
+  EveryInc/compound-engineering-plugin:compound-engineering \
+  DietrichGebert/ponytail:ponytail \
+  ayghri/i-have-adhd:i-have-adhd \
+  kepano/obsidian-skills:obsidian
+do
+  claude plugin marketplace add "${entry%%:*}"
+  claude plugin install "${entry##*:}"
+done
+```
 
 ## Containerization
 
