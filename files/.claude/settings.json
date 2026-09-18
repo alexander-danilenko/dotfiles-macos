@@ -51,7 +51,6 @@
     "command": "cd $HOME/.claude/statusline && ([ -x statusline ] || go build) && ./statusline",
     "refreshInterval": 30
   },
-  "effortLevel": "xhigh",
   "tui": "fullscreen",
   "autoMemoryEnabled": true,
   "autoDreamEnabled": true,
