@@ -1,12 +1,10 @@
-[include]
-  path = ~/.gitconfig.local
-
 [core]
   autocrlf   = input
   safecrlf   = false
   ignorecase = false
   longpaths  = true
   editor     = nano
+  excludesfile =
 
 [diff]
   renames    = copies
@@ -30,11 +28,14 @@
   branch     = auto
 
 [alias]
+  a          = apply --index
   c          = commit -m
+  fa         = fetch --all
+  ff         = !git pull origin $(git branch --show-current) --ff-only
   hidden     = !git ls-files -v | grep "^[[:lower:]]"
   hide       = update-index --assume-unchanged
   history    = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-  last       = log -1 HEAD --stat 
+  last       = log -1 HEAD --stat
   ls         = log --stat
   p          = "!git pull origin $(git branch --show-current) --rebase --autostash"
   pd         = pull origin develop --rebase --autostash
@@ -43,3 +44,20 @@
   s          = status --short --branch
   unhide     = update-index --no-assume-unchanged
 
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+
+[user]
+	name = Alex Danilenko
+	email = alex.danilenko@wesalute.com
+
+[includeIf "gitdir:~/Work/pet/"]
+    path = ~/Work/pet/.gitconfig
+[includeIf "gitdir:~/Work/wesalute/"]
+    path = ~/Work/wesalute/.gitconfig
+
+[fetch]
+	prune = true
